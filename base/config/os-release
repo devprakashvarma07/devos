@@ -1,0 +1,7 @@
+NAME="DevOS"
+VERSION="2.0 (Whale)"
+ID=devos
+ID_LIKE=debian
+PRETTY_NAME="DevOS 2.0 (Whale)"
+VERSION_ID="2.0"
+HOME_URL="https://devos.local"

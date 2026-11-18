@@ -1,0 +1,21 @@
+# cmds/crash-backtrace.txt — dev image ke andhar SIGSEGV ka real backtrace lo.
+# Yeh file n3-dev-console.py --commands se jaati hai; ek line = ek VM shell command.
+# Pehle service rok do (DRM master ek hi process le sakta hai), phir gdb me run karo.
+uname -a
+cat /proc/cmdline
+ls -l /dev/dri
+gdb --version 2>&1 | head -1
+dpkg -l gdb 2>/dev/null | tail -1
+systemctl stop devos-comp.service
+sleep 1
+journalctl -u devos-comp --no-pager --lines=200 | grep -aE 'SEGV|status=|result|Scheduled restart' | head -6
+mkdir -p /run/devos
+chmod 700 /run/devos
+export XDG_RUNTIME_DIR=/run/devos HOME=/root WLR_BACKENDS=drm
+ulimit -c unlimited
+echo === GL auto renderer: gdb run ===
+timeout 120 gdb -batch -ex run -ex 'bt 25' -ex 'echo \nREGS\n' -ex 'info registers rip rsp rbp' --args /usr/local/bin/devos-comp --autologin > /tmp/gdb-gl.txt 2>&1
+tail -55 /tmp/gdb-gl.txt
+echo === frames ka source mapping ===
+grep -aoE '(devos-comp|libwlroots[^ ]*|libEGL[^ ]*|swrast[^ ]*)' /tmp/gdb-gl.txt | sort -u | head -12
+ls -l /tmp/cores 2>/dev/null | head -5

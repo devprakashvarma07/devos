@@ -1,0 +1,9 @@
+# cmds/drm-capprobe.txt — VM ke andar ka GPU/Mesa reality: DRM_CAP_3D + GL driver naam.
+# Ye numbers renderer-policy ke liye ground truth hain (memory se nahi, maap kar).
+# Binary n3-drm-capprobe.sh banakar dev-disk me /root/n3-drm-capprobe par daalta hai.
+echo MARK-drm-capprobe-start
+ls -la /dev/dri
+echo MARK-probe-run
+/root/n3-drm-capprobe
+echo MARK-probe-rc
+echo done

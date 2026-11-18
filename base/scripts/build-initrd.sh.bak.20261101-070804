@@ -1,0 +1,66 @@
+#!/bin/bash
+# build-initrd.sh — chhota busybox initrd banata hai (squashfs + overlay + switch_root)
+# Hinglish: kernel modules rootfs se copy hote hain, isliye initrd ~25-30 MB rehta hai.
+set -euo pipefail
+
+PROJ="$(cd "$(dirname "$0")/.." && pwd)"
+ROOTFS="${ROOTFS:-$PROJ/rootfs}"
+BUILD="${BUILD:-$PROJ/build}"
+OUT="$BUILD/devos-initrd.cpio.gz"
+[ "$(id -u)" -eq 0 ] || { echo "root chahiye"; exit 1; }
+
+KERNEL_IMG="$(ls "$ROOTFS"/boot/vmlinuz-*devos 2>/dev/null | head -1 || true)"
+[ -n "$KERNEL_IMG" ] || KERNEL_IMG="$(ls "$ROOTFS"/boot/vmlinuz-* | head -1)"
+K="$(basename "$KERNEL_IMG")"
+K="${K#vmlinuz-}"
+echo "==> kernel $K"
+
+B="$BUILD/initrd"
+rm -rf "$B"
+mkdir -p "$B"/{bin,dev,etc,proc,sys,tmp,run,lower,mnt,overlay,new_root}
+chmod 1777 "$B/tmp"
+
+# busybox + applet symlinks
+BUSYBOX="${BUSYBOX:-$(command -v busybox || true)}"
+[ -n "$BUSYBOX" ] || { echo "busybox-static install karo (apt install busybox-static)"; exit 1; }
+cp "$BUSYBOX" "$B/bin/busybox"
+# NOTE: busybox applet list me khud "busybox" bhi hota hai — use skip karo,
+# warna asli binary ud kar self-symlink ban jata hai aur kernel "No working init" deta hai.
+for a in $("$B/bin/busybox" --list); do
+    [ "$a" = busybox ] && continue
+    ln -sf busybox "$B/bin/$a"
+done
+echo "==> busybox applets: $(find "$B/bin" -type l | wc -l)"
+
+# boot-critical modules + unki dependencies
+MODS="libata ata_piix ata_generic ahci sr_mod cdrom isofs loop squashfs overlay
+      sd_mod scsi_mod usb-storage virtio_blk virtio_pci"
+LIST="$BUILD/modlist.txt"
+: > "$LIST"
+for m in $MODS; do
+    modprobe -d "$ROOTFS" -S "$K" --show-depends "$m" 2>/dev/null |
+        awk '/^insmod /{print $2}' >> "$LIST" || true
+done
+sort -u "$LIST" -o "$LIST"
+mkdir -p "$B/lib/modules/$K"
+n=0
+while read -r f; do
+    [ -f "$f" ] || continue
+    rel="${f#"$ROOTFS"}"          # /lib/modules/... (ya /usr/lib/modules/...)
+    case "$rel" in /lib/*|/usr/lib/*) ;; *) rel="/lib/modules/$K/$(basename "$f")" ;; esac
+    mkdir -p "$B$(dirname "$rel")"
+    cp -a "$f" "$B$rel"
+    n=$((n+1))
+done < "$LIST"
+for meta in modules.dep modules.dep.bin modules.alias modules.alias.bin modules.softdep \
+            modules.builtin modules.builtin.bin modules.builtin.alias.bin \
+            modules.devname modules.symbols modules.symbols.bin; do
+    [ -f "$ROOTFS/lib/modules/$K/$meta" ] && cp "$ROOTFS/lib/modules/$K/$meta" "$B/lib/modules/$K/" || true
+done
+echo "==> modules copied: $n"
+
+install -m755 "$PROJ/scripts/initrd-init" "$B/init"
+
+mkdir -p "$BUILD"
+(cd "$B" && find . -print0 | cpio --null -o -H newc --quiet | gzip -9) > "$OUT"
+echo "==> $OUT ($(du -h "$OUT" | cut -f1))"

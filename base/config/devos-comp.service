@@ -1,0 +1,25 @@
+[Unit]
+Description=DevOS Compositor (native C shell)
+After=systemd-udev-settle.service systemd-user-sessions.service
+Wants=systemd-udev-settle.service
+Conflicts=getty@tty1.service
+Before=getty.target
+
+[Service]
+Type=simple
+Environment=XDG_RUNTIME_DIR=/run/devos
+Environment=HOME=/root
+Environment=TERM=linux
+ExecStartPre=/bin/mkdir -p /run/devos
+ExecStartPre=/bin/sh -c 'for i in $(seq 1 50); do [ -e /dev/dri/card0 ] && exit 0; sleep 0.1; done'
+ExecStart=/usr/local/bin/devos-comp --autologin
+Restart=always
+RestartSec=2
+StandardOutput=journal+console
+StandardError=journal+console
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+
+[Install]
+WantedBy=graphical.target

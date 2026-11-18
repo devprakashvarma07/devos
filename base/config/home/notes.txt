@@ -1,0 +1,5 @@
+DevOS notes
+
+- ye asli file hai: ~/Documents/notes.txt
+- Ctrl+S se save hota hai
+- Files app me Documents kholo

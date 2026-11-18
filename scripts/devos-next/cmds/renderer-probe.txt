@@ -1,0 +1,28 @@
+# cmds/renderer-probe.txt — naye devos-comp (renderer-policy: autocreate se PEHLE probe)
+# ka dev-VM test. Expect: 'renderer policy: /dev/dri/renderD128 driver=<software>' phir
+# 'WLR_RENDERER=pixman' aur 25 sec zinda (rc=124) with compositor ready + Xwayland ready
+# — GL crash ke bina.
+systemctl stop devos-comp.service
+sleep 1
+# dev image me meri purani debug env file 'WLR_RENDERER=' (khali) bake hui thi — wo
+# wlroots me 'Invalid WLR_RENDERER value' deti hai. Hatao mat, side me rakho.
+mv /etc/devos-comp-debug.env /etc/devos-comp-debug.env.disabled 2>/dev/null
+mkdir -p /run/devos
+chmod 700 /run/devos
+export XDG_RUNTIME_DIR=/run/devos HOME=/root WLR_BACKENDS=drm
+echo MARK-new-binary-version
+/usr/local/bin/devos-comp --version
+echo MARK-manual-run-with-policy
+timeout 25 /usr/local/bin/devos-comp --autologin > /tmp/probe1.txt 2>&1
+tail -22 /tmp/probe1.txt
+echo MARK-markers-probe1
+grep -a -E 'renderer policy|GL renderer|compositor ready|Xwayland ready|Segmentation' /tmp/probe1.txt
+echo MARK-unit-start
+systemctl start devos-comp.service
+sleep 12
+systemctl is-active devos-comp.service
+echo MARK-unit-journal
+journalctl -u devos-comp --no-pager --lines=22
+echo MARK-unit-restarts
+systemctl show devos-comp.service -p NRestarts
+systemctl stop devos-comp.service

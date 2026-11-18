@@ -1,0 +1,23 @@
+--- a/scripts/mkcompile_h
++++ b/scripts/mkcompile_h
+@@ -4,6 +4,9 @@
+ UTS_MACHINE=$1
+ CC_VERSION="$2"
+ LD=$3
++# DevOS: compiler/ld branding (third-party toolchain naam hide)
++CC_VERSION="DevOS GCC 12.2.0"
++LD_VERSION_OVERRIDE="GNU ld"
+ 
+ if test -z "$KBUILD_BUILD_USER"; then
+ 	LINUX_COMPILE_BY=$(whoami | sed 's/\\/\\\\/')
+@@ -16,8 +19,8 @@
+ 	LINUX_COMPILE_HOST=$KBUILD_BUILD_HOST
+ fi
+ 
+-LD_VERSION=$(LC_ALL=C $LD -v | head -n1 |
+-		sed -e 's/(compatible with [^)]*)//' -e 's/[[:space:]]*$//')
++LD_VERSION="${LD_VERSION_OVERRIDE:-$(LC_ALL=C $LD -v | head -n1 |
++		sed -e 's/(compatible with [^)]*)//' -e 's/[[:space:]]*$//')}"
+ 
+ cat <<EOF
+ #define UTS_MACHINE		"${UTS_MACHINE}"

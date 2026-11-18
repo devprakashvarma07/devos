@@ -1,0 +1,39 @@
+# cmds/policy-and-probe.txt — ek hi VM boot me do kaam:
+#   A) /root/n3-drm-capprobe  -> VM ki asli GPU/Mesa truth: PRIME cap, Mesa driver naam,
+#      gl RENDERER string. Ye renderer-policy ke numbers ka ground truth hai.
+#   B) naya /usr/local/bin/devos-comp -> policy verdict + 25 sec survival + Xwayland ready.
+# Expect QEMU -vga virtio par: probe driver=swrast/llvmpipe, policy -> WLR_RENDERER=pixman,
+# 'renderer: pixman (software)' aur rc=124, koi Segmentation nahi.
+echo MARK-A-probe-start
+ls -la /dev/dri
+echo MARK-A-probe-card-binding
+cat /sys/class/drm/card*/device/driver 2>/dev/null; readlink /sys/class/drm/card*/device/driver 2>/dev/null
+echo MARK-A-probe-run
+/root/n3-drm-capprobe
+echo MARK-A-probe-done
+echo MARK-B-service-stop
+systemctl stop devos-comp.service
+sleep 1
+# dev image me purani debug env file 'WLR_RENDERER=' khali value bake hui thi — wlroots
+# use 'Invalid WLR_RENDERER value' samajhta hai. Hatao nahi, side me rakho.
+mv /etc/devos-comp-debug.env /etc/devos-comp-debug.env.disabled 2>/dev/null
+mkdir -p /run/devos
+chmod 700 /run/devos
+export XDG_RUNTIME_DIR=/run/devos HOME=/root WLR_BACKENDS=drm
+echo MARK-B-new-binary-version
+/usr/local/bin/devos-comp --version
+echo MARK-B-manual-run-with-policy
+timeout 25 /usr/local/bin/devos-comp --autologin > /tmp/probe1.txt 2>&1
+tail -24 /tmp/probe1.txt
+echo MARK-B-markers-probe1
+grep -a -E 'renderer policy|GL renderer|renderer: pixman|compositor ready|Xwayland ready|Segmentation' /tmp/probe1.txt
+echo MARK-B-unit-start
+systemctl start devos-comp.service
+sleep 12
+systemctl is-active devos-comp.service
+echo MARK-B-unit-journal
+journalctl -u devos-comp --no-pager --lines=22
+echo MARK-B-unit-restarts
+systemctl show devos-comp.service -p NRestarts
+systemctl stop devos-comp.service
+echo MARK-ALL-DONE

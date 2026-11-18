@@ -1,0 +1,30 @@
+# cmds/renderer-ab.txt — dev VM ke andar GL-renderer crash ke liye env A/B.
+# Har 'timeout 25 ...' line ka exit code hi jawab hai (harness sentinel $? pakadta hai):
+#   124 = zinda raha (timeout ne maara)  |  139 = SIGSEGV  |  other = shuru me hi fail
+# Ek boot me paanch variants, ISO rebuild nahi (dev console + writable image).
+systemctl stop devos-comp.service
+sleep 1
+mkdir -p /run/devos
+chmod 700 /run/devos
+export XDG_RUNTIME_DIR=/run/devos HOME=/root WLR_BACKENDS=drm
+echo === AB1 baseline (WLR_RENDERER unset = GL auto) ===
+timeout 25 /usr/local/bin/devos-comp --autologin > /tmp/ab1.txt 2>&1
+grep -ac 'compositor ready' /tmp/ab1.txt
+echo === AB2 WLR_DRM_NO_MODIFIERS=1 ===
+env WLR_DRM_NO_MODIFIERS=1 timeout 25 /usr/local/bin/devos-comp --autologin > /tmp/ab2.txt 2>&1
+grep -ac 'compositor ready' /tmp/ab2.txt
+grep -a 'Xwayland ready' /tmp/ab2.txt
+echo === AB3 LP_NUM_THREADS=1 ===
+env LP_NUM_THREADS=1 timeout 25 /usr/local/bin/devos-comp --autologin > /tmp/ab3.txt 2>&1
+grep -ac 'compositor ready' /tmp/ab3.txt
+grep -a 'Xwayland ready' /tmp/ab3.txt
+echo === AB4 no-modifiers + 1 thread ===
+env WLR_DRM_NO_MODIFIERS=1 LP_NUM_THREADS=1 timeout 25 /usr/local/bin/devos-comp --autologin > /tmp/ab4.txt 2>&1
+grep -ac 'compositor ready' /tmp/ab4.txt
+grep -a 'Xwayland ready' /tmp/ab4.txt
+echo === AB5 pixman (control: ye toh chalta hai) ===
+env WLR_RENDERER=pixman timeout 25 /usr/local/bin/devos-comp --autologin > /tmp/ab5.txt 2>&1
+grep -ac 'compositor ready' /tmp/ab5.txt
+grep -a 'Xwayland ready' /tmp/ab5.txt
+echo === crash lines ka summary (kaunsa variant kis lib me mara) ===
+for f in /tmp/ab1.txt /tmp/ab2.txt /tmp/ab3.txt /tmp/ab4.txt /tmp/ab5.txt; do printf '%s: ' "$f"; grep -aE 'SIGSEGV|failed to create dri2|falling back|renderer|Segmentation' "$f" | head -3 | tr '\n' '|'; echo; done

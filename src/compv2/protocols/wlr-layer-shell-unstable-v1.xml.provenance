@@ -1,0 +1,10 @@
+# provenance — slice 3 build input
+file     : wlr-layer-shell-unstable-v1.xml
+source   : https://gitlab.freedesktop.org/wlroots/wlroots/-/raw/0.15.1/protocol/wlr-layer-shell-unstable-v1.xml
+fetched  : 2026-11-02T09:38:07+00:00
+sha256   : 996b8c66e1c2276c443336d4cb174634e8e5948823779042f244930525b79cc2
+bytes    : 18462
+wlroots  : 0.15.1 (jo version rootfs/libwlroots.so.10 me shipped hai)
+kyun zaroori: libwlroots-dev ye generated protocol header ship nahi karta;
+                wlr_layer_shell_v1.h isi include karta hai (n3-api-layer2.sh §A)
+license  : MIT (wlroots upstream ke saath hi aati hai)

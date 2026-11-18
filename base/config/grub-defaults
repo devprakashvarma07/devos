@@ -1,0 +1,7 @@
+# DevOS 2.0 — GRUB defaults (installed systems)
+GRUB_DEFAULT=0
+GRUB_TIMEOUT=1
+GRUB_DISTRIBUTOR="DevOS"
+GRUB_CMDLINE_LINUX_DEFAULT="quiet loglevel=3 vt.global_cursor_default=0"
+GRUB_CMDLINE_LINUX=""
+GRUB_DISABLE_OS_PROBER=true

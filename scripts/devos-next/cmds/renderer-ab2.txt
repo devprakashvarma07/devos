@@ -1,0 +1,37 @@
+# cmds/renderer-ab2.txt — ab1 ke rc=1 aur ab5(pixman) ke rc=134 ka karan + flakiness.
+# Har run ka rc harness sentinel se milta hai: 124=zinda, 139=SEGV, 134=abort, 1=clean exit.
+# Parentheses wale echo bash me syntax error dete hain -> MARK- labels bina brackets.
+systemctl stop devos-comp.service
+sleep 2
+mkdir -p /run/devos
+chmod 700 /run/devos
+export XDG_RUNTIME_DIR=/run/devos HOME=/root WLR_BACKENDS=drm
+echo MARK-baseline-1
+timeout 20 /usr/local/bin/devos-comp --autologin > /tmp/b1.txt 2>&1
+tail -8 /tmp/b1.txt
+echo MARK-baseline-2
+timeout 20 /usr/local/bin/devos-comp --autologin > /tmp/b2.txt 2>&1
+tail -8 /tmp/b2.txt
+echo MARK-baseline-3
+timeout 20 /usr/local/bin/devos-comp --autologin > /tmp/b3.txt 2>&1
+tail -8 /tmp/b3.txt
+echo MARK-nomodifiers-1
+env WLR_DRM_NO_MODIFIERS=1 timeout 20 /usr/local/bin/devos-comp --autologin > /tmp/n1.txt 2>&1
+tail -4 /tmp/n1.txt
+echo MARK-nomodifiers-2
+env WLR_DRM_NO_MODIFIERS=1 timeout 20 /usr/local/bin/devos-comp --autologin > /tmp/n2.txt 2>&1
+tail -4 /tmp/n2.txt
+echo MARK-lp1thread-1
+env LP_NUM_THREADS=1 timeout 20 /usr/local/bin/devos-comp --autologin > /tmp/l1.txt 2>&1
+tail -4 /tmp/l1.txt
+echo MARK-lp1thread-2
+env LP_NUM_THREADS=1 timeout 20 /usr/local/bin/devos-comp --autologin > /tmp/l2.txt 2>&1
+tail -4 /tmp/l2.txt
+echo MARK-pixman-1
+env WLR_RENDERER=pixman timeout 20 /usr/local/bin/devos-comp --autologin > /tmp/p1.txt 2>&1
+tail -8 /tmp/p1.txt
+echo MARK-pixman-2
+env WLR_RENDERER=pixman timeout 20 /usr/local/bin/devos-comp --autologin > /tmp/p2.txt 2>&1
+tail -8 /tmp/p2.txt
+echo MARK-counts
+for f in /tmp/b1.txt /tmp/b2.txt /tmp/b3.txt /tmp/n1.txt /tmp/n2.txt /tmp/l1.txt /tmp/l2.txt /tmp/p1.txt /tmp/p2.txt; do printf '%s ready=%s xw=%s\n' "$f" "$(grep -ac compositor.ready "$f")" "$(grep -ac Xwayland.ready "$f")"; done

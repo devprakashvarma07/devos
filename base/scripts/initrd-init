@@ -1,0 +1,123 @@
+#!/bin/busybox sh
+# DevOS live init — Hinglish: minimal init, koi live-boot/casper nahi
+#
+# Universal-boot ka sach (QEMU boot matrix, 2026-11-01):
+#   purana init ek HARD-CODED 16-module list load karta tha (libata/ahci/sr_mod/virtio...)
+#   aur sirf /dev/sda../vda/nvme0n1 probe karta tha. Result:
+#     - USB-xhci stick -> /dev/sd* bhi nahi bana (xhci-hcd/usb-storage/uas load hi nahi hue)
+#     - NVMe disk      -> nvme load hi nahi hua, /dev/nvme0n1 dikhta hi nahi
+#   Module initrd me *maujood* hona kaafi nahi — init ko usse *load* bhi karna padta hai.
+# Ab: initrd me jo modules hain (build-initrd.sh ki MODS + unki deps) SAB load karo, phir
+# /dev ke har block device ko priority order me try karo. Naya controller aane par init
+# badalne ki zaroorat nahi — sirf MODS list badlegi.
+export PATH=/bin:/sbin:/usr/bin:/usr/sbin
+BB=/bin/busybox
+
+msg() { echo "[devos] $*"; }
+die() { msg "FATAL: $*"; exec $BB sh; }
+
+$BB mount -t proc     proc     /proc || die "proc"
+$BB mount -t sysfs    sysfs    /sys  || die "sysfs"
+$BB mount -t devtmpfs devtmpfs /dev || die "devtmpfs"
+mkdir -p /dev/pts /dev/shm
+$BB mount -t devpts devpts /dev/pts
+
+# ---- 1) initrd ke saare modules load (modules.dep copied hai, so deps khud solve honge) ----
+load_all_modules() {
+    K="$($BB uname -r)"
+    for MD in "/lib/modules/$K" "/usr/lib/modules/$K"; do
+        [ -d "$MD" ] || continue
+        ok=0; tot=0
+        for f in $($BB find "$MD" -name '*.ko*'); do
+            m="$(basename "$f")"; m="${m%%.ko*}"
+            tot=$((tot+1))
+            # filename xhci-pci.ko -> module xhci_pci; modprobe dono spelling try karo
+            if $BB modprobe "$m" 2>/dev/null || $BB modprobe "$(echo "$m" | tr '-' '_')" 2>/dev/null; then
+                ok=$((ok+1))
+            fi
+        done
+        msg "modules: $ok/$tot loaded (from $MD)"
+        return 0
+    done
+    msg "WARNING: /lib/modules/$K initrd me nahi mila — sirf built-in drivers se boot hoga"
+}
+
+# ---- 2) device mount karke /devos.sq dhundho ----
+try_mount() {
+    dev="$1"
+    [ -b "$dev" ] || return 1
+    # CD = iso9660, USB/HDD = vfat|ext4|squashfs — 'auto' fail ho to fs khud try karo
+    for fs in auto iso9660 vfat exfat ext4; do
+        if [ "$fs" = auto ]; then
+            $BB mount -o ro "$dev" /mnt 2>/dev/null || continue
+        else
+            $BB mount -t "$fs" -o ro "$dev" /mnt 2>/dev/null || continue
+        fi
+        if [ -f /mnt/devos.sq ]; then return 0; fi
+        $BB umount /mnt 2>/dev/null
+    done
+    return 1
+}
+
+# live media priority: optical -> USB/SATA (stick yahi dikhta hai) -> NVMe -> eMMC -> virtio
+# (laptop me DevOS already installed ho, tab bhi live stick jeetni chahiye)
+block_devs() {
+    for pat in '/dev/sr*' '/dev/sd*' '/dev/nvme*' '/dev/mmcblk*' '/dev/vd*'; do
+        for d in $pat; do
+            [ -b "$d" ] || continue
+            case "$d" in /dev/loop*|/dev/ram*|/dev/zram*|/dev/dm-*) continue ;; esac
+            echo "$d"
+        done
+    done
+}
+
+mkdir -p /mnt
+SRC=""
+
+# cmdline override: devos_device=/dev/nvme0n1p2 (installer / advanced users)
+DEVOS_DEVICE=""
+for a in $($BB cat /proc/cmdline); do
+    case "$a" in devos_device=*) DEVOS_DEVICE="${a#devos_device=}" ;; esac
+done
+
+load_all_modules
+
+i=0
+while [ $i -lt 6 ]; do
+    if [ -n "$DEVOS_DEVICE" ] && try_mount "$DEVOS_DEVICE"; then
+        SRC="$DEVOS_DEVICE"
+    else
+        for d in $(block_devs); do
+            if try_mount "$d"; then SRC="$d"; break; fi
+        done
+    fi
+    [ -n "$SRC" ] && break
+    # USB enumeration der se hoti hai (kuch controllers 3-5s lete hain) — dobara try
+    $BB sleep 2
+    i=$((i+1))
+done
+
+if [ -z "$SRC" ]; then
+    msg "block devices: $(ls /sys/block 2>/dev/null | tr '\n' ' ')"
+    msg "cmdline: $($BB cat /proc/cmdline)"
+    die "DevOS squashfs nahi mila (ISO/USB?)"
+fi
+msg "squashfs mila: $SRC"
+
+$BB mount -t squashfs -o ro,loop /mnt/devos.sq /lower || die "squashfs mount"
+
+# writable overlay (tmpfs upper)
+mkdir -p /overlay /lower /new_root
+$BB mount -t tmpfs -o mode=0755 tmpfs /overlay || die "tmpfs"
+mkdir -p /overlay/upper /overlay/work
+$BB mount -t overlay overlay \
+  -o lowerdir=/lower,upperdir=/overlay/upper,workdir=/overlay/work /new_root || die "overlay"
+
+# ab persistent mounts ko naye root me le jao (/dev ke saath pts/shm bhi jaate hain)
+mkdir -p /new_root/proc /new_root/sys /new_root/dev /new_root/run
+for d in proc sys dev; do
+    $BB mount --move "/$d" "/new_root/$d" || msg "move $d failed"
+done
+
+msg "switch_root -> DevOS"
+exec $BB switch_root /new_root /sbin/init

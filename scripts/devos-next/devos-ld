@@ -1,0 +1,14 @@
+#!/bin/sh
+# devos-ld — GNU ld wrapper, sirf `-v` (version line) brand karta hai
+#
+# scripts/mkcompile_h `LD_VERSION=$(LC_ALL=C $LD -v | head -n1 ...)` use karta hai.
+# Debian ka ld "GNU ld (GNU Binutils for Debian) 2.44" print karta hai -> vendor naam
+# /proc/version me. Baaki sab links real ld ko jaate hain.
+REAL="${DEVOS_REAL_LD:-/usr/bin/ld}"
+for a in "$@"; do
+    if [ "$a" = "-v" ] || [ "$a" = "--version" ]; then
+        echo "GNU ld $("$REAL" -v 2>/dev/null | awk '{print $NF}' | head -n1)"
+        exit 0
+    fi
+done
+exec "$REAL" "$@"

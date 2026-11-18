@@ -1,0 +1,23 @@
+#!/bin/sh
+# devos-cc — gcc wrapper, taaki /proc/version me distro toolchain branding na aaye
+#
+# Kyun: 6.12 ka Makefile CC_VERSION_TEXT ko `$(CC) --version | head -n 1` se leta hai aur
+# wo CONFIG_CC_VERSION_TEXT ke through .config me record ho jaata hai, phir scripts/mkcompile_h
+# use /proc/version me daalta hai. Debian ka gcc "gcc (Debian 14.2.0-19) 14.2.0" print karta
+# hai -> vendor naam OS identity me aa jaata. Source patch karne ke bajaye wrapper isliye behtar
+# hai: kernel version badalne par bhi kuch foldna nahi padta.
+#
+# Sirf --version/-v ka pehla line brand hota hai; baaki sab args real gcc ko jaate hain,
+# isliye -dumpversion/-print-file-name/dependency-generation sab waise hi chalte hain.
+REAL="${DEVOS_REAL_CC:-/usr/bin/gcc}"
+v=""
+for a in "$@"; do
+    [ "$a" = "--version" ] && v=1
+    [ "$a" = "-v" ] && v="${v}2"
+done
+case "$v" in
+    1)  # kbuild sirf head -n 1 leta hai
+        echo "DevOS GCC $("$REAL" -dumpfullversion 2>/dev/null || echo unknown)"
+        exit 0 ;;
+esac
+exec "$REAL" "$@"

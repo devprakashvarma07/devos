@@ -1,0 +1,9 @@
+# build artifacts (never commit big binaries)
+*.iso
+*.img
+*.qcow2
+*.ppm
+out/
+build/
+artifacts/
+*.log

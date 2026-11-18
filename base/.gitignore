@@ -1,0 +1,5 @@
+rootfs/
+build/
+out/
+*.iso
+*.ppm
