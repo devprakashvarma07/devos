@@ -5,7 +5,7 @@
 *.ppm
 out/
 build/
-repo/
+/repo/
 artifacts/
 *.log
 __pycache__/

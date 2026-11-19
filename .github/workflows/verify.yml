@@ -1,0 +1,38 @@
+name: verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax checks
+        run: |
+          set -euo pipefail
+          for f in scripts/repo/*.sh scripts/security/*.sh scripts/desktop/*.sh; do
+            bash -n "$f"
+          done
+          python3 -m py_compile scripts/repo/mkrepo.py
+          echo "syntax ok"
+
+      - name: Build packages
+        run: bash ./scripts/repo/build-packages.sh
+
+      - name: Build repository tree (unsigned)
+        run: python3 scripts/repo/mkrepo.py build/debs build/repo
+
+      - name: Check repository metadata
+        run: |
+          set -euo pipefail
+          grep -q '^Origin: DevOS$' build/repo/dists/stable/Release
+          grep -q '^Package: devos-keyring$' build/repo/dists/stable/main/binary-amd64/Packages
+          grep -q '^Package: devos-update$' build/repo/dists/stable/main/binary-amd64/Packages
+          echo "repository metadata ok"

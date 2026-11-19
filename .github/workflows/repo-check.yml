@@ -1,0 +1,27 @@
+name: repo-check
+
+on:
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-live-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify the live signed repository
+        run: |
+          set -euo pipefail
+          BASE="https://devprakashvarma07.github.io/devos"
+          KEY="packaging/devos-keyring/usr/share/keyrings/devos-archive-keyring.gpg"
+          curl -fsS "$BASE/dists/stable/InRelease" -o /tmp/InRelease
+          gpgv --keyring "$KEY" /tmp/InRelease
+          curl -fsS "$BASE/dists/stable/main/binary-amd64/Packages" -o /tmp/Packages
+          grep -q '^Package: devos-keyring$' /tmp/Packages
+          grep -q '^Package: devos-update$' /tmp/Packages
+          echo "live repository signature and metadata ok"
