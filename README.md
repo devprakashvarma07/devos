@@ -10,7 +10,7 @@
 | Item | Value |
 |---|---|
 | Version | DevOS 1.0 (live + installer) |
-| ISO size | 1.4 GiB (`devos-1.0-amd64-r7.iso`) |
+| ISO size | 1.4 GiB (`devos-1.0-amd64-r8.iso`) |
 | Browser | NetSurf 3.11 (lightweight); no heavy browser bundled |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos` (autologin) |
 | Compositor | `devos-compositor` — the DevOS Wayland compositor |
