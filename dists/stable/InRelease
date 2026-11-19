@@ -6,28 +6,28 @@ Label: DevOS
 Suite: stable
 Codename: stable
 Version: 1.0
-Date: Thu, 19 Nov 2026 18:35:38 +0000
-Valid-Until: Sat, 19 Dec 2026 18:35:38 +0000
+Date: Thu, 19 Nov 2026 18:37:20 +0000
+Valid-Until: Sat, 19 Dec 2026 18:37:20 +0000
 Architectures: amd64
 Components: main
 Description: DevOS package archive
 Acquire-By-Hash: yes
 MD5Sum:
- 6b4730f8e0f2950b539d7c9607609439 2076 main/binary-amd64/Packages
- 526ec69de9b4149e4c79318baec09cf8 1044 main/binary-amd64/Packages.gz
- 254978393a9d9558486dff322bb41650 1116 main/binary-amd64/Packages.xz
+ 6d9a0acf58ac0167224fcd70d8bf675e 2076 main/binary-amd64/Packages
+ 376d1ffc3966598549aca6d612728726 1042 main/binary-amd64/Packages.gz
+ 6892a6548f3182256d18ffd9fec622a7 1120 main/binary-amd64/Packages.xz
 SHA1:
- ad4f0bdd3d7b1970d267f60952d31cb7925da460 2076 main/binary-amd64/Packages
- 3e15c71f1bfdcae715d3b30bd0c5017b74961e1f 1044 main/binary-amd64/Packages.gz
- 8c52ee0ce03e69c1c03fb6d9714d2fe9a540c196 1116 main/binary-amd64/Packages.xz
+ f3f30ae31d2691d6492c231003f891171242d5b1 2076 main/binary-amd64/Packages
+ e7a1c4580fe4a160d9b48e67366a8058524ba254 1042 main/binary-amd64/Packages.gz
+ 1a4698259dfa07a60017878ff427a0153529b630 1120 main/binary-amd64/Packages.xz
 SHA256:
- d1ebcc2ac7a2943b06121776f5743c129229d343d9a1d18acf5f2281b209b1a7 2076 main/binary-amd64/Packages
- eb2a14ab2f133e6e88708d9432b82fa7b70802ea50f1fdc485e9370f3a0ccafe 1044 main/binary-amd64/Packages.gz
- fec1c8e2177c817c51d862b195f188f08eae71530de30bf108e97a74391eec3a 1116 main/binary-amd64/Packages.xz
+ 6445e1df88aef34705847a1b65727d347ef7b6f19697aa65f1d6d124ef97ea92 2076 main/binary-amd64/Packages
+ e0f13237192a60143d2f91f74d2cfadb91277da7a6bf225430cc75bb85c5fee9 1042 main/binary-amd64/Packages.gz
+ 5cdb39dd986ad20a7e377f03065800eef063d1ff436cf80cecb69fed9eec083f 1120 main/binary-amd64/Packages.xz
 -----BEGIN PGP SIGNATURE-----
 
-iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCav9BegAKCRCrAe3eAP7C
-S+7PAP0etJvF9YoPqNgbFu2o3HEenKI1klpPLUwM66hfjc1LiQD8DGfVpisXwn9y
-ZltVvzu3BO8YnWzrJTeLpOBvB5PiEwc=
-=xD0q
+iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCav9B4AAKCRCrAe3eAP7C
+S7iAAQCzLUenUXtyX+3YCinwRmkxYJPCsf5+CtlxPxXg+pT9jAEAirU7Swbpf7Iz
+R/uDnfc971Zu8ZlR1TRjFnqt5j/89wA=
+=PclS
 -----END PGP SIGNATURE-----
