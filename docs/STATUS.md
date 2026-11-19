@@ -30,6 +30,27 @@
 
 Release process: [`UPDATES.md`](UPDATES.md). Defaults and limitations: [`SECURITY.md`](SECURITY.md).
 
+## Audio and system polish (2026-11-20)
+
+| Item | Value |
+|---|---|
+| Package | `devos-audio` (1.0.2) — `status`/`diagnose`/`test`/`fix` + **DevOS Audio** app-grid launcher |
+| Pulled in | `alsa-utils` (aplay/amixer/speaker-test), `pulseaudio-utils` (pactl), `pavucontrol` (GUI mixer), `powermgmt-base`, `rsync` |
+| Diagnose | `devos-audio diagnose` writes `/tmp/devos-audio-report.txt`: cards, modules, firmware, UCM, dmesg, PipeWire nodes, volumes |
+| Timezone | `Asia/Kolkata` (was UTC — clock was 5 h 30 m behind the laptop) |
+| Locale | `LANG=en_US.UTF-8` (was `C.UTF-8`) |
+| Faster boot | `NetworkManager-wait-online.service` disabled |
+| No modem | `ModemManager.service` disabled (no WWAN hardware) |
+| Journal | capped at 200 MB (`journald.conf.d/50-devos.conf`) |
+| Storage | `fstrim.timer`, `e2scrub` timers already enabled; 4 GiB `/swapfile` |
+
+Audio stack itself is complete in the image: `firmware-sof-signed` 2025.01, `alsa-ucm-conf` 1.2.14,
+PipeWire 1.4.2 + WirePlumber, `snd-hda-intel`/`snd-sof-pci-intel-tgl` for the target's
+Alder Lake + ALC269 codec. Debian `trixie` has no newer `firmware-sof-signed` in the archive
+(`apt-cache policy` shows 2025.01-1 as candidate), so the firmware was not changed blindly.
+**The actual hardware check still needs one run of `devos-audio diagnose` on the laptop.**
+
+
 ## Install to disk (verified)
 
 Installed alongside Ubuntu on the target laptop's NVMe, on a dedicated partition.

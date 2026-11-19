@@ -1,0 +1,13 @@
+Package: devos-audio
+Version: 1.0.3
+Architecture: all
+Maintainer: DevOS <security@devos.local>
+Section: sound
+Priority: optional
+Depends: alsa-utils, pulseaudio-utils, pipewire, pipewire-pulse, pipewire-alsa, wireplumber
+Recommends: pavucontrol
+Description: Audio diagnostics and repair for DevOS
+ devos-audio reports the sound cards, kernel modules, firmware, PipeWire
+ nodes and mixer state, plays a test tone and applies safe repairs
+ (audio group, unmute, audio stack restart). Includes a "DevOS Audio"
+ launcher for the app grid.

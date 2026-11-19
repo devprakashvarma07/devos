@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=DevOS Audio
+GenericName=Sound Diagnostics
+Comment=Check and repair sound output on DevOS
+Exec=/usr/bin/x-terminal-emulator -e /usr/bin/devos-audio-tui
+Icon=devos-audio
+Terminal=false
+Categories=System;Settings;AudioVideo;
+Keywords=sound;audio;speaker;volume;alsa;pipewire;
+StartupNotify=true

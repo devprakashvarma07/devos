@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="DevOS Audio">
+  <title>DevOS Audio</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5AA0FF"/>
+      <stop offset="1" stop-color="#2F6FE0"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="58" height="58" rx="14" fill="url(#bg)"/>
+  <path d="M17 27h7l10-8v26l-10-8h-7z" fill="#F8FAFF"/>
+  <g fill="none" stroke="#F8FAFF" stroke-width="3.4" stroke-linecap="round">
+    <path d="M39 26.5a8 8 0 0 1 0 11"/>
+    <path d="M44.5 22a14 14 0 0 1 0 20"/>
+  </g>
+</svg>

@@ -1,0 +1,211 @@
+#!/usr/bin/env bash
+# devos-audio — DevOS audio diagnostics and repair
+# Hinglish comments: user ko ek command me poora audio report chahiye.
+set -uo pipefail
+
+VERSION="1.0.3"
+
+say()  { printf '==> %s\n' "$*"; }
+have() { command -v "$1" > /dev/null 2>&1; }
+
+# wireplumber 0.5 me `wpctl get-default` nahi hai — @DEFAULT_AUDIO_SINK@ inspect karo
+default_sink() {
+    if have wpctl && wpctl status > /dev/null 2>&1; then
+        wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null \
+            | sed -n 's/^[[:space:]]*node.description = "\(.*\)"/\1/p' | head -1
+    fi
+}
+
+usage() {
+    cat <<EOF
+devos-audio $VERSION — DevOS audio diagnostics
+
+  status    short: cards, sinks, volume, mute
+  diagnose  full report (also written to /tmp/devos-audio-report.txt)
+  test      play a short test tone on the default output
+  fix       apply safe repairs (group, restart audio stack, unmute)
+  version   print version
+  help      this text
+EOF
+}
+
+root_or_sudo() {
+    if [ "$(id -u)" -eq 0 ]; then
+        CMD=""
+    else
+        CMD="sudo"
+    fi
+}
+
+run_dmesg() {
+    # hardening may restrict dmesg for users -> try sudo, then plain
+    if have dmesg; then
+        dmesg 2>/dev/null | grep -iE 'sof|snd_|hda|soundwire|audio' | tail -60
+        return
+    fi
+    return 1
+}
+
+do_status() {
+    echo "DevOS audio status"
+    echo "------------------"
+    echo "kernel:     $(uname -r)"
+    echo "cards:"
+    if have aplay; then aplay -l 2>/dev/null | sed 's/^/  /'; else echo "  (aplay missing)"; fi
+    echo "sound modules:"
+    lsmod 2>/dev/null | awk '$1 ~ /^(snd|soundwire|sof)/{printf "  %s\n",$1}' | head -20
+    echo "firmware:   $(dpkg-query -W -f='${Version}' firmware-sof-signed 2>/dev/null || echo 'not installed')"
+    echo "ucm:        $(dpkg-query -W -f='${Version}' alsa-ucm-conf 2>/dev/null || echo 'not installed')"
+    if have wpctl; then
+        if wpctl status >/dev/null 2>&1; then
+            echo "pipewire:"
+            wpctl status 2>/dev/null | sed 's/^/  /' | head -40
+            echo "default sink: $(default_sink || echo 'unknown')"
+        else
+            echo "pipewire:   not running (no user session, or PipeWire failed to start)"
+        fi
+    else
+        echo "pipewire:   (wpctl missing)"
+    fi
+    if have pactl && pactl info >/dev/null 2>&1; then
+        pactl info 2>/dev/null | grep -E 'Server Name|Default Sink' | sed 's/^/  /'
+    fi
+    if have amixer; then
+        echo "master mixer:"
+        amixer -c 0 2>/dev/null | grep -E 'Simple mixer control' | sed 's/^/  /' | head -12
+    fi
+}
+
+do_diagnose() {
+    local out=/tmp/devos-audio-report.txt
+    {
+        echo "===== DevOS audio report $(date -u +%FT%TZ) ====="
+        echo "devos-audio $VERSION"
+        echo
+        echo "--- os ---"
+        grep -E '^(PRETTY_NAME|VERSION_ID)=' /etc/os-release 2>/dev/null
+        uname -a
+        echo
+        echo "--- packages ---"
+        for p in pipewire pipewire-pulse pipewire-alsa wireplumber alsa-utils \
+                 pulseaudio-utils alsa-ucm-conf firmware-sof-signed firmware-intel-sound; do
+            printf '%-22s %s\n' "$p" "$(dpkg-query -W -f='${Version}' "$p" 2>/dev/null || echo NOT-INSTALLED)"
+        done
+        echo
+        echo "--- kernel modules (sound) ---"
+        lsmod 2>/dev/null | awk '$1 ~ /^(snd|soundwire|sof)/{printf "%s\n",$1}'
+        echo
+        echo "--- modules available in this kernel ---"
+        find /lib/modules/$(uname -r) -name 'snd-hda-intel.ko*' -o -name 'snd-sof-pci-intel-tgl.ko*' \
+             -o -name 'snd-hda-codec-realtek.ko*' 2>/dev/null | sed 's|.*/||'
+        echo
+        echo "--- firmware files ---"
+        ls /lib/firmware/intel/sof/ 2>/dev/null | grep -E 'adl|tgl' | head -20
+        ls /lib/firmware/intel/sof-ipc4-tplg/ 2>/dev/null | grep -E 'adl' | head -20
+        echo
+        echo "--- alsa cards ---"
+        aplay -l 2>&1 | sed 's/^/  /'
+        echo
+        echo "--- alsa controls (card 0) ---"
+        amixer -c 0 2>/dev/null | grep -E 'Simple mixer control' | sed 's/^/  /'
+        echo
+        echo "--- dmesg (audio) ---"
+        if [ "$(id -u)" -eq 0 ]; then
+            run_dmesg
+        else
+            sudo -n dmesg 2>/dev/null | grep -iE 'sof|snd_|hda|soundwire|audio' | tail -60 || \
+              dmesg 2>/dev/null | grep -iE 'sof|snd_|hda|soundwire|audio' | tail -60 || \
+              echo "(dmesg restricted — run: sudo devos-audio diagnose)"
+        fi
+        echo
+        echo "--- ucm profiles ---"
+        ls /usr/share/alsa/ucm2/conf.d/ 2>/dev/null | sed 's/^/  /'
+        echo
+        echo "--- pipewire ---"
+        if have wpctl; then
+            if wpctl status >/dev/null 2>&1; then
+                wpctl status 2>&1 | sed 's/^/  /'
+                echo "default sink: $(default_sink || echo 'unknown')"
+            else
+                echo "(PipeWire is not running in this context)"
+            fi
+        else
+            echo "(wpctl missing)"
+        fi
+        if have pactl && pactl info >/dev/null 2>&1; then
+            echo "--- pactl info ---"
+            pactl info 2>&1 | sed 's/^/  /'
+            echo "--- pactl sinks ---"
+            pactl list short sinks 2>&1 | sed 's/^/  /'
+        fi
+        echo
+        echo "--- user session audio ---"
+        id
+        loginctl list-sessions 2>/dev/null | sed 's/^/  /'
+        echo
+        echo "===== end of report ====="
+    } | tee "$out"
+    say "report saved to $out"
+}
+
+do_test() {
+    local secs="${1:-3}"
+    say "playing a ${secs}s test tone on the default output"
+    if have speaker-test; then
+        timeout "$secs" speaker-test -t sine -c 2 -f 440 -l 1 2>&1 \
+            | grep -vE 'Write error: -4|xrun_recovery|Transfer failed' | tail -8
+        say "if you heard a tone, the audio path works end to end"
+    elif have aplay; then
+        say "speaker-test missing — install alsa-utils"
+    else
+        say "no test tool available (alsa-utils not installed)"
+        exit 1
+    fi
+}
+
+do_fix() {
+    root_or_sudo
+    say "1/4 checking audio group membership"
+    local user_name="${SUDO_USER:-$USER}"
+    if [ -n "$user_name" ] && [ "$user_name" != "root" ]; then
+        if id -nG "$user_name" 2>/dev/null | tr ' ' '\n' | grep -qx audio; then
+            echo "   $user_name already in audio group"
+        else
+            echo "   adding $user_name to audio group"
+            $CMD usermod -aG audio "$user_name"
+        fi
+    fi
+
+    say "2/4 unmuting ALSA master (best effort)"
+    if have amixer; then
+        $CMD amixer -q sset Master unmute 2>/dev/null && echo "   Master unmuted" || true
+        $CMD amixer -q sset PCM unmute 2>/dev/null && echo "   PCM unmuted" || true
+        $CMD amixer -q -c 0 sset 'Speaker' unmute 2>/dev/null || true
+    fi
+
+    say "3/4 restarting the audio stack (PipeWire + WirePlumber)"
+    if have systemctl; then
+        $CMD systemctl --user restart pipewire.service pipewire-pulse.service 2>&1 | sed 's/^/   /' || true
+        sleep 2
+        $CMD systemctl --user restart wireplumber.service 2>&1 | sed 's/^/   /' || true
+        systemctl --user is-active pipewire.service wireplumber.service pipewire-pulse.service 2>/dev/null | sed 's/^/   /' || true
+    fi
+
+    say "4/4 unmuting the PipeWire default sink"
+    if have wpctl; then
+        wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 2>&1 | sed 's/^/   /' || true
+        wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.5 2>&1 | sed 's/^/   /' || true
+        echo "   default sink: $(default_sink || echo 'unknown')"
+    fi
+    say "done — run: devos-audio test"
+}
+
+case "${1:-status}" in
+    status)   do_status ;;
+    diagnose) do_diagnose ;;
+    test)     do_test "${2:-3}" ;;
+    fix)      do_fix ;;
+    version|--version|-v) echo "devos-audio $VERSION" ;;
+    help|--help|-h) usage ;;
+    *) usage >&2; exit 2 ;;
+esac

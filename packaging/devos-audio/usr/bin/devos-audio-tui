@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# devos-audio-tui — interactive audio menu (terminal me chalta hai)
+set -uo pipefail
+
+pause() {
+    printf '\nEnter dabao continue karne ke liye...'
+    read -r _ || true
+    echo
+}
+
+while true; do
+    clear 2>/dev/null || true
+    printf '==============================================\n'
+    printf '               DevOS Audio\n'
+    printf '==============================================\n\n'
+    cat <<'MENU'
+  1) Show status (cards, sinks, volume)
+  2) Full diagnose (writes a report file)
+  3) Play test tone
+  4) Try automatic fixes
+  q) Quit
+MENU
+    printf '\nChoice: '
+    read -r choice || exit 0
+    case "$choice" in
+        1) devos-audio status; pause ;;
+        2) devos-audio diagnose; pause ;;
+        3) devos-audio test 3; pause ;;
+        4) devos-audio fix; pause ;;
+        q|Q) exit 0 ;;
+        *) ;;
+    esac
+done

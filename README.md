@@ -23,7 +23,7 @@ Screenshots: [`screenshots/`](screenshots)
 
 ```
 branding/            DevOS logos, wallpapers, isolinux/plymouth art
-packaging/           DevOS .deb packages (archive keyring, update manager)
+packaging/           DevOS .deb packages (archive keyring, update manager, audio tools)
 scripts/
   boot-devOS.sh      boot the built ISO in QEMU/KVM
   desktop/           ISO build, squashfs, initrd and browser scripts
@@ -70,6 +70,15 @@ automatically. Users can also open **DevOS Update** from the app grid or run `de
 devos-update status        # timer, last run, pending packages
 sudo devos-update check    # refresh lists, show upgrades
 sudo devos-update upgrade  # install all upgrades
+```
+
+Sound problems get their own tool, also available as **DevOS Audio** in the app grid:
+
+```bash
+devos-audio status     # cards, modules, sinks, volume
+devos-audio diagnose   # full report written to /tmp/devos-audio-report.txt
+devos-audio test       # play a test tone
+devos-audio fix        # unmute, restart PipeWire/WirePlumber, check groups
 ```
 
 Releasing an update is one publish step:

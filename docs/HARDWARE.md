@@ -37,7 +37,14 @@ dmesg | grep -iE "firmware|iwlwifi|sof|i915"  # firmware load errors?
 ip link                                        # wlan0 exists?
 aplay -l                                       # sound card?
 libinput list-devices | grep -i touchpad       # touchpad?
+devos-audio diagnose                           # sab kuch ek report me
 ```
+
+Sound ke liye `devos-audio` hi kaafi hai — cards, kernel modules, firmware,
+UCM profiles, dmesg aur PipeWire nodes sab ek report me
+(`/tmp/devos-audio-report.txt`) aa jaate hain. `devos-audio test` se ek test tone
+bajti hai aur `devos-audio fix` safe repairs karta hai (unmute, audio group,
+PipeWire/WirePlumber restart). App grid me **DevOS Audio** launcher bhi hai.
 
 Agar koi line `firmware: failed to load` dikhaye, us file ka naam note karke
 `/lib/firmware` me daalna hai (host Ubuntu se copy kar sakte hain) aur
