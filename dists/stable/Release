@@ -3,21 +3,21 @@ Label: DevOS
 Suite: stable
 Codename: stable
 Version: 1.0
-Date: Thu, 19 Nov 2026 17:12:53 +0000
-Valid-Until: Sat, 19 Dec 2026 17:12:53 +0000
+Date: Thu, 19 Nov 2026 17:17:10 +0000
+Valid-Until: Sat, 19 Dec 2026 17:17:10 +0000
 Architectures: amd64
 Components: main
 Description: DevOS package archive
 Acquire-By-Hash: yes
 MD5Sum:
- dfc9f8edb37406b6c423655dbca01c2c 1243 main/binary-amd64/Packages
- eb9f30b08b578475d47cd8ac0aa7cfb0 685 main/binary-amd64/Packages.gz
- 485745e26c707ca7d5d2f67ffef057b1 760 main/binary-amd64/Packages.xz
+ 31f523417971dd63a5211e272c922695 1328 main/binary-amd64/Packages
+ ce1b624b339b55ac554c094d4f9cd7c0 735 main/binary-amd64/Packages.gz
+ bfff9dcced77bb3f0e5d3305a6a47e1e 812 main/binary-amd64/Packages.xz
 SHA1:
- e55ac17362a6956a14645cf3937020086a5751fe 1243 main/binary-amd64/Packages
- 9dd616eb3447d91a91f3e74a403293d3dbd597b9 685 main/binary-amd64/Packages.gz
- 98e2ecbc7543fcf6e4b07851d8cf1a71bdc4f50b 760 main/binary-amd64/Packages.xz
+ 07fcbd65cea2de0ec8341174c4c805a611b12ddc 1328 main/binary-amd64/Packages
+ bca34273d6558050f1e60c62555803f4a0050c39 735 main/binary-amd64/Packages.gz
+ 491de4b1656d424f27a15bb6d703bfe29a11501d 812 main/binary-amd64/Packages.xz
 SHA256:
- 588ecd0b8f4f0f2a95b3a04f65a407dc25384b7c8ae9ef4a8ad5e53dd5102e83 1243 main/binary-amd64/Packages
- f485708252ba8336f58c4d4e0537b5fda1e87e25c8b476d33bdae82e697299bf 685 main/binary-amd64/Packages.gz
- fdc8931950211c5adb125cb12f4b41f092e52fb18a0573137182c88f3dfd20ce 760 main/binary-amd64/Packages.xz
+ c47981b53e974fcb222417bfe29cf33d0bee2cadc6f0f800a2eedb550cdf3c87 1328 main/binary-amd64/Packages
+ 5244b5c5d6011396efbaa9b40357066770e9787b7b86e3b3f2ebc95333c9e436 735 main/binary-amd64/Packages.gz
+ e56c5c5041f4762f70ffcb4a4f28bde9215243191b8a596d215a5ca020a55ff8 812 main/binary-amd64/Packages.xz
