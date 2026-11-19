@@ -6,28 +6,28 @@ Label: DevOS
 Suite: stable
 Codename: stable
 Version: 1.0
-Date: Thu, 19 Nov 2026 16:39:46 +0000
-Valid-Until: Sat, 19 Dec 2026 16:39:46 +0000
+Date: Thu, 19 Nov 2026 17:10:08 +0000
+Valid-Until: Sat, 19 Dec 2026 17:10:08 +0000
 Architectures: amd64
 Components: main
 Description: DevOS package archive
 Acquire-By-Hash: yes
 MD5Sum:
- 47bd423883ed104dcf8575c96f9e1a77 1243 main/binary-amd64/Packages
- 080152d00b613f6e6d7efe45cdc13d82 682 main/binary-amd64/Packages.gz
- 49e94c428f036a6713f3685edeec4f33 764 main/binary-amd64/Packages.xz
+ 0569d573918af8e99f2434f34d1a567e 1243 main/binary-amd64/Packages
+ 1a651fbc828d2d498246a6800b0c36eb 686 main/binary-amd64/Packages.gz
+ 6eab3dd0795c1919dc99bdcc424703b1 764 main/binary-amd64/Packages.xz
 SHA1:
- 6c6f45022ab9a093da25552ee0a83ecfaf95be16 1243 main/binary-amd64/Packages
- d2ac3a3d3bebc725b3af07bd102478f320341bbb 682 main/binary-amd64/Packages.gz
- 4ca5ad4e6591632d5b613978d2b97a75e9dcd9cb 764 main/binary-amd64/Packages.xz
+ 7370e741d2628df3ef8cddfa669e10b4acf11955 1243 main/binary-amd64/Packages
+ 758b2eb1b31a4ab5899000008f42e7c48faee175 686 main/binary-amd64/Packages.gz
+ 6620a867a6f1f6563ad2f5cde846e9d5588dca81 764 main/binary-amd64/Packages.xz
 SHA256:
- d48f8cb99cee0b41b179fe958cacb42d9270721b5467084472006505812cee39 1243 main/binary-amd64/Packages
- fcd19fd05dc4e82026f0453092b61bcf987a71a346719da8dc7c9639aaa8d32f 682 main/binary-amd64/Packages.gz
- 6221f13e7b7435050fb09486ae59a1ee34e993551bd3d76c1dab93ec6d025540 764 main/binary-amd64/Packages.xz
+ b7adb485d60652fd38220d08d5f157b52b671601ec722c0885fa5ae7fdcc02ed 1243 main/binary-amd64/Packages
+ 383db3496088d7f045b93d590647923143c056d6859a9cc63c0fbe13c94bbb9e 686 main/binary-amd64/Packages.gz
+ 22518bdd7a0101f286a3cab4b76a4958fba70423958ab8565f7830bd81ad3391 764 main/binary-amd64/Packages.xz
 -----BEGIN PGP SIGNATURE-----
 
-iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCav8mUgAKCRCrAe3eAP7C
-S9LBAP0WlTGuL0m/zbFiCa6/1w+TXBN0WHPipAxONgtrNxOLhgEAigsZNscevyrM
-RRfUFfAlJW/F41tp2RRS0hSMYBd8/AU=
-=FK6j
+iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCav8tcAAKCRCrAe3eAP7C
+S+iWAP9Qbh89PH5LuPDTx1VGSiK1LZb+1MZgkQEt9hdQGUjVkAEA/wlAjzEdbapI
+qXRZXnsqcW6y97V6jyQ5Gdh3F36NFw4=
+=9qbL
 -----END PGP SIGNATURE-----
