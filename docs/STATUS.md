@@ -12,7 +12,7 @@
 | r8 changes | ships `devos-keyring`, `devos-update`, unattended security upgrades and the hardening baseline |
 | r7 (previous) | `4eb1fc608a8db845d9e408a00df72b6becef8a799a79e529257b87e09d72e390` |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos`, autologin |
-| Live verified | Dock and launcher grid render all theme icons; Appearance lists one entry, **DevOS** |
+| Live verified | r8 live boot (KVM): DevOS desktop, dock and installer language step render correctly; r7: theme icons + single Appearance entry |
 | Browser | NetSurf 3.11 (≈6 MB) with DevOS icon and default web handler; HTTPS and `.deb` download verified |
 
 ## Updates and security
@@ -95,8 +95,6 @@ The original exFAT storage partition contained no files (512 KiB of filesystem m
 5. **Secure Boot** — the installed GRUB chain is signed, but the kernel package in the image is
    unsigned; Secure Boot is disabled on the target laptop. Do not enable it without signing the
    kernel.
-6. **r8 boot test** — r8 adds packages and configuration to the verified r7 rootfs; the squashfs
-   and package contents were checked, a full virtual-machine boot test is still pending.
-7. **Existing r7 installs** — they do not have `devos-keyring` yet, so the update channel must be
+6. **Existing r7 installs** — they do not have `devos-keyring` yet, so the update channel must be
    enabled once by hand (`docs/UPDATES.md`, "Existing installations"). Fresh r8 installs need no
    action.
