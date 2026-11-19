@@ -1,5 +1,5 @@
 Package: devos-audio
-Version: 1.0.2
+Version: 1.0.3
 Architecture: all
 Maintainer: DevOS <security@devos.local>
 Section: sound
@@ -11,11 +11,11 @@ Description: Audio diagnostics and repair for DevOS
  nodes and mixer state, plays a test tone and applies safe repairs
  (audio group, unmute, audio stack restart). Includes a "DevOS Audio"
  launcher for the app grid.
-Filename: pool/main/d/devos-audio/devos-audio_1.0.2_all.deb
-Size: 4212
-MD5sum: 031050437b7fa4326ee9dc37f477a38e
-SHA1: d766f26f793c9bbfe6ae134a90345acb4ad5a364
-SHA256: 16762c729c7154e9df73d3913ae72f31962d2b5949b8a9a37811bab48f0f711e
+Filename: pool/main/d/devos-audio/devos-audio_1.0.3_all.deb
+Size: 4354
+MD5sum: c70a743c87fef943d800b47cfa0c4039
+SHA1: fbefcfbdf74ca622eaf844149dc30c7c66cd8dac
+SHA256: aa14ccefaccad9450e6e9402efe5d127e4d664d508cdd7d3cee29611e2ee2db7
 
 Package: devos-keyring
 Version: 1.0.0
@@ -30,9 +30,9 @@ Description: DevOS package archive signing key and APT source
  InRelease file over HTTPS.
 Filename: pool/main/d/devos-keyring/devos-keyring_1.0.0_all.deb
 Size: 1192
-MD5sum: aa8ad7152b33557c3d4adf86b33582b1
-SHA1: 5f0e49463639c41ee899beeb60324ec1d50cba4b
-SHA256: 20c993a917742b69740bd9a0f6b01fe7b1accaf6d9a99577c48a495ad9ed2bcd
+MD5sum: ea3047524464ee7c4d12eef317602f09
+SHA1: 79464b8fb6674002a8bc484bcedd9db4b5d389f3
+SHA256: 50f45376c42ad68f12dff58bf8724483e8617cede7ed21da0d572715215f7d41
 
 Package: devos-update
 Version: 1.0.5
@@ -48,6 +48,6 @@ Description: Safe update manager for DevOS
  security upgrades.
 Filename: pool/main/d/devos-update/devos-update_1.0.5_all.deb
 Size: 4232
-MD5sum: 5076e88d7238089203a0173501910e77
-SHA1: e84df428fd78133b0d8c1143d3cba8c673c8bec1
-SHA256: 77fa79ff399a14d17a25b3560231c80e9212a0f6658be801eb7adf844c742932
+MD5sum: 0d65c5bcc07fcd04c4639f00f1aa07a2
+SHA1: 2c8f692e7de1ed48e98309fc8342f0a788ca481b
+SHA256: a44fca134fe893d0efb26b1eaa046e39c8454bf27a0afdc420730013a04db303
