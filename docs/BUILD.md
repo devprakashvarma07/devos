@@ -80,6 +80,10 @@ VNC=1 ./scripts/boot-devOS.sh    # headless, VNC on :1
 
 ## Notes
 
-- The ISO is ~1.5 GB; Cutefish/Qt pulls in a large dependency set.
-- Chromium ships in the base ISO; remove it and wire it into the installer if you need a smaller
-  image with an opt-in browser.
+- The ISO is ~1.4 GiB; Cutefish/Qt pulls in a large dependency set.
+- **Browser:** Chromium is not shipped. The image carries NetSurf 3.11
+  (`netsurf-gtk`, ~6 MB installed) so the user can download a browser of their
+  choice; `scripts/cutefish/install-browser.sh` reproduces the swap (purge
+  Chromium, install NetSurf, theme icon, default web handler).
+- Hardware coverage for the reference laptop (Intel i3-1215U / AX201 / ADL-P
+  audio) is listed in [`HARDWARE.md`](HARDWARE.md).

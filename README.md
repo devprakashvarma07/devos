@@ -13,8 +13,9 @@ Cutefish's — while every user-visible surface is branded **DevOS**.
 | Item | Value |
 |---|---|
 | Version | DevOS 1.0 (Cutefish-based, live + installer) |
-| ISO size | 1.5 GB (`devos-1.0-cutefish-amd64-r2.iso`) |
-| Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `user` (autologin) |
+| ISO size | 1.4 GiB (`devos-1.0-cutefish-amd64-r7.iso`) |
+| Browser | NetSurf 3.11 (lightweight); Chromium not shipped |
+| Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos` (autologin) |
 | Compositor | `devos-compositor` — rebranded fork of the Cutefish Wayland compositor |
 | Verified | Live boot, installer, Settings → About, fastfetch, boot splash, app grid |
 | Artifacts | ISOs are **not** committed here (too large); build them with the scripts below |

@@ -6,12 +6,13 @@
 
 | Cheez | Value |
 |---|---|
-| File (latest) | `artifacts/devos-1.0-cutefish/devos-1.0-cutefish-amd64-r6.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
-| Size | 1.5 GB |
-| sha256 | `788e2edc489428cdbea50886897ceb8952e6759ce68785e04afabab8c094ada3` |
+| File (latest) | `artifacts/devos-1.0-cutefish/devos-1.0-cutefish-amd64-r7.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| Size | 1.4 GiB (1,461,190,656 B) |
+| sha256 | `4eb1fc608a8db845d9e408a00df72b6becef8a799a79e529257b87e09d72e390` |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos`, autologin |
-| VM verified | r6 live boot: dock + launcher grid ke **saare theme icons render** (`/tmp/opencode/r6-1.png`, `r6-launcher.png`); Appearance list me ek hi entry DevOS |
-| Purana ISO | r2..r5 + `devos-1.0-cutefish-amd64.iso` — delete nahi kiye, reference ke liye rakhe |
+| VM verified | r6/r7 live boot: dock + launcher grid ke **saare theme icons render**; Appearance list me ek hi entry DevOS |
+| Browser | Chromium **hata diya**, NetSurf 3.11 (≈6 MB) + apna icon + default handler — HTTPS aur `.deb` download VM me verified |
+| Purana ISO | r2..r6 + `devos-1.0-cutefish-amd64.iso` — delete nahi kiye, reference ke liye rakhe |
 
 ## Compositor = apna Wayland (`devos-compositor`)
 
@@ -58,7 +59,9 @@ Cutefish compositor ko DevOS naam par fork/rename kiya (open source, attribution
   (`IconLoader::theme()`) icons directory-name se dhoondta hai, isliye theme icons missing the
   (hicolor ke PNG chalte the) — r6 me fix + VM verified.
 - **Installer:** "Install DevOS", localized strings bhi ("Instalar o DevOS"), DevOS wallpaper.
-- **Launcher/app grid:** Calculator, Calendar, Chromium, Fcitx 5, Files, Install DevOS, Preview, Settings, System Monitor, Terminal, Text Editor, Video Player — koi Cutefish naam nahi.
+- **Launcher/app grid:** Calculator, Calendar, Fcitx 5, Files, Install DevOS, NetSurf Web Browser, Preview, Settings, System Monitor, Terminal, Text Editor, Video Player — koi Cutefish naam nahi, Chromium hata diya.
+- **Browser (default):** NetSurf 3.11 (`netsurf-gtk`, ~6 MB installed) — halka, GTK, HTTPS + file download kaam karta hai; user isi se apni pasand ka browser (`.deb`) download kar sakta hai. Default web handler `/etc/xdg/mimeapps.list` se NetSurf hai. Script: `scripts/cutefish/install-browser.sh`.
+- **Hardware (target laptop):** Intel i3-1215U / AX201 Wi-Fi / ADL-P audio / UHD graphics / I2C-HID touchpad — saare drivers + firmware image me maujood (details `docs/HARDWARE.md`).
 - **Wallpaper default:** DevOS artwork; Cutefish betta wallpaper replace; `default-cutefish.jpg` → `wallpaper-0.jpg`.
 - **Portals:** `.portal` `UseIn=DevOS;DevOS-Wayland;DevOS-wayland;`, `devos-portals.conf` + `DevOS-portals.conf` symlink + generic `portals.conf`.
 - **System text:** os-release/lsb-release/issue = DevOS, systemd descriptions, polkit vendor DevOS, passwd GECOS, modprobe conf, apt sources (cutefish repo disabled/backup).
@@ -83,8 +86,8 @@ sudo python3 /run/media/dev/Data/DevOS/repos/devos/scripts/cutefish/rename-compo
 
 ## Kholi hui cheezein (user decision chahiye)
 
-1. **Chromium ISO me hai** (~1.5 GB ka karan) — requirement thi "browser opt-in at setup, ISO me nahi". Remove karna hai to ~120 MB bachega (rebuild + Chromium ko setup option banana padega).
-2. **ISO 1.5 GB** — pehle target ≤800 MB tha; Cutefish/Qt base bhaari hai.
-3. **Install test** — abhi tak live boot verify hua (autologin + compositor + X11 name). qcow2 par actual install + reboot verify pending hai.
+1. **ISO 1.4 GB** — pehle target ≤800 MB tha; Cutefish/Qt base bhaari hai (Chromium hatane ke baad ~143 MB kam hua).
+2. **Install test** — abhi tak live boot verify hua (autologin + compositor + X11 name + browser). qcow2 par actual install + reboot verify pending hai.
+3. **Asli laptop par test** — Wi-Fi/audio/touchpad firmware image me hai, lekin virtual machine par verify nahi ho sakta; live USB se ek baar check karna baaki (`docs/HARDWARE.md` me commands).
 4. **Baaki internal names** — shell apps (`cutefish-core`, `cutefish-launchpad`, `cutefish-settings`, …) ke process/DBus naam abhi bhi cutefish hain; `ps`/System Monitor me dikhte hain. Compositor + session rename ho chuke hain; baaki ko rename karna bada cross-repo change hai.
 5. **Source rebuild** — abhi binary patching hai; long-term compositor ko source se build karke strings badalna hai (`docs/COMPOSITOR.md` me plan).
