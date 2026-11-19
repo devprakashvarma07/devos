@@ -24,7 +24,7 @@
 | Update tool | `devos-update status/check/upgrade/security`, daily `devos-update.timer` |
 | Automatic | Debian security + DevOS stable updates via `unattended-upgrades` (no auto reboot) |
 | Hardening | nftables default-deny inbound, kernel/network sysctl, AppArmor, time sync, no core dumps |
-| Verified | live `InRelease` signature valid; chroot `apt-get update` fetches the DevOS suite |
+| Verified | live `InRelease` signature valid; end-to-end: installed system upgraded 1.0.0 → 1.0.1 from the live repo |
 
 Release process: [`UPDATES.md`](UPDATES.md). Defaults and limitations: [`SECURITY.md`](SECURITY.md).
 

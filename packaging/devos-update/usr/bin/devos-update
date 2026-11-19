@@ -2,6 +2,7 @@
 # devos-update — safe update manager for DevOS
 set -euo pipefail
 
+VERSION="1.0.1"
 STATE=/var/lib/devos-update
 mkdir -p "$STATE"
 
@@ -18,7 +19,14 @@ pending_count() {
     apt-get -s upgrade 2>/dev/null | grep -c '^Inst ' || true
 }
 
+reboot_needed() {
+    [ -f /var/run/reboot-required ]
+}
+
 case "${1:-status}" in
+version|--version|-v)
+    echo "devos-update $VERSION"
+    ;;
 check)
     need_root check
     say "refreshing package lists"
@@ -26,6 +34,9 @@ check)
     date -u +%FT%TZ >"$STATE/last-check"
     echo "pending upgrades: $(pending_count)"
     apt list --upgradable 2>/dev/null | sed '1d' | head -40 || true
+    if reboot_needed; then
+        say "reboot required"
+    fi
     ;;
 upgrade)
     need_root upgrade
@@ -38,7 +49,11 @@ upgrade)
         full-upgrade
     apt-get -y autoremove --purge
     date -u +%FT%TZ >"$STATE/last-upgrade"
-    say "done (reboot if the kernel or graphics stack changed)"
+    if reboot_needed; then
+        say "done — reboot required (kernel or core packages changed)"
+    else
+        say "done — no reboot required"
+    fi
     ;;
 security)
     need_root security
@@ -54,6 +69,7 @@ security)
     ;;
 status)
     echo "DevOS update status"
+    echo "  version:      $VERSION"
     echo "  last check:   $(cat "$STATE/last-check" 2>/dev/null || echo never)"
     echo "  last upgrade: $(cat "$STATE/last-upgrade" 2>/dev/null || echo never)"
     echo "  pending:      $(pending_count)"
@@ -62,6 +78,9 @@ status)
         echo "  timer:        enabled"
     else
         echo "  timer:        disabled"
+    fi
+    if reboot_needed; then
+        echo "  reboot:       required"
     fi
     ;;
 *)
@@ -72,6 +91,7 @@ usage: devos-update <command>
   upgrade    install all available upgrades (keeps existing config files)
   security   apply security updates only (unattended-upgrade)
   status     show timer state, last runs and pending count
+  version    print the installed devos-update version
 USAGE
     exit 2
     ;;
