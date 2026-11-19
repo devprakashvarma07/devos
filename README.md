@@ -13,8 +13,9 @@ Cutefish's — while every user-visible surface is branded **DevOS**.
 | Item | Value |
 |---|---|
 | Version | DevOS 1.0 (Cutefish-based, live + installer) |
-| ISO size | 1.5 GB (`devos-1.0-cutefish-amd64.iso`) |
-| Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos` |
+| ISO size | 1.5 GB (`devos-1.0-cutefish-amd64-r2.iso`) |
+| Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `user` (autologin) |
+| Compositor | `devos-compositor` — rebranded fork of the Cutefish Wayland compositor |
 | Verified | Live boot, installer, Settings → About, fastfetch, boot splash, app grid |
 | Artifacts | ISOs are **not** committed here (too large); build them with the scripts below |
 
@@ -26,13 +27,17 @@ Screenshots: [`screenshots/`](screenshots)
 branding/            DevOS logos, wallpapers, isolinux/plymouth art
 scripts/
   boot-devOS.sh      boot the built ISO in QEMU/KVM
-  cutefish/          ISO build + squashfs + initrd + string rebranding tools
+  cutefish/          ISO build + squashfs + initrd + rebranding tools
+                     (incl. rename-compositor.py for the DevOS compositor)
   devos-next/        from-source track helper scripts
 src/                 our own compositor work (compv2, layertest)
 base/                from-source base track (kernel config, packages, docs)
-docs/                build and branding documentation
+docs/                build, branding and compositor-fork documentation
 screenshots/         verified UI evidence
 ```
+
+The compositor fork is documented in [`docs/COMPOSITOR.md`](docs/COMPOSITOR.md): what was renamed,
+how the binary patches work, and the licensing/attribution rules that come with a fork.
 
 ## Build (short version)
 
@@ -53,17 +58,25 @@ Details, prerequisites and the full branding sweep: [`docs/BUILD.md`](docs/BUILD
 DevOS keeps the Cutefish UX intact. Branding is applied in three layers:
 
 1. **Text/assets** — desktop entries, wallpapers, plymouth theme, GRUB/isolinux art, logos.
-2. **Session identity** — `XDG_CURRENT_DESKTOP=DevOS` (patched in `cutefish-session`), so portals,
-   screenshot and system info report DevOS.
-3. **In-place binary strings** — only where the string is compiled into a binary (e.g. the Settings
+2. **Session identity** — the session script exports `XDG_CURRENT_DESKTOP=DevOS` and
+   `XDG_SESSION_DESKTOP=DevOS`; the session manager is patched to match, so portals, screenshot and
+   system info report DevOS.
+3. **Compositor fork** — the Cutefish Wayland compositor ships as `devos-compositor` with DevOS
+   process name, X11 `_NET_WM_NAME`, notification identity and help text. See
+   [`docs/COMPOSITOR.md`](docs/COMPOSITOR.md).
+4. **In-place binary strings** — only where the string is compiled into a binary (e.g. the Settings
    "About" title). The tools and exact approach are documented in `docs/BRANDING.md`.
 
-Internal binary names (`cutefish-*`, D-Bus names) are intentionally left unchanged — they are not
-user-visible and renaming them would break session/portal compatibility.
+Internal identifiers (`org.cutefish.*` D-Bus names, the `cutefish_shell` protocol, C++ namespaces and
+`/usr/share/cutefish-*` paths) are intentionally unchanged — they are not user-visible, and renaming
+them requires lock-step changes in every Cutefish component. Old executable names stay as
+compatibility symlinks (`cutefish-compositor` → `devos-compositor`, and likewise for the session).
 
 ## Credits
 
 - [Cutefish](https://github.com/cutefishos) — desktop environment (GPL-3.0 / BSD-3-Clause mixed)
+- The Cutefish compositor is itself derived from Chromium/Aura (Ash) code — © The Chromium Authors
+  and The ChromiumOS Authors; the fork keeps those notices and the packaged `copyright` file.
 - Debian — base userland and live-boot
 - Linux kernel, Qt, Wayland and the wider open-source ecosystem
 

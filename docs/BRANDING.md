@@ -74,6 +74,21 @@ strings -t x /usr/bin/<binary> | grep Cutefish
 objdump -d /usr/bin/<binary> | grep -A4 -B4 Cutefish
 ```
 
+## 3b. Compositor fork (`devos-compositor`)
+
+The Wayland compositor is shipped under DevOS naming; details, patch table and licensing rules are
+in [`COMPOSITOR.md`](COMPOSITOR.md). In short:
+
+- binary/process: `cutefish-compositor` → `devos-compositor` (+ compat symlink)
+- session manager: `cutefish-session` → `devos-session` (+ compat symlink)
+- session script: `cutefish-wayland-session` → `devos-wayland-session` (+ compat symlink)
+- Wayland socket: `cutefish-0` → `devos-0`
+- visible strings: `_NET_WM_NAME`, notification app/vendor, inhibitor label, `--help`, output names
+
+The session `.desktop` **filename stays** `cutefish-wayland.desktop` on purpose: the display manager
+(`cutefish-dm`) stores the autologin session id as `cutefish-wayland`, and the filename is not shown
+in the UI (the visible `Name=` is "DevOS (Wayland)").
+
 ## 4. Integration details
 
 - Renaming `XDG_CURRENT_DESKTOP` touches three consumers: the portal `UseIn=`, screenshot
