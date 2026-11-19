@@ -14,7 +14,7 @@ NOTES="${3:-DevOS $TAG}"
 SUM_DIR="$(mktemp -d)"
 trap 'rm -rf "$SUM_DIR"' EXIT
 SUM="$SUM_DIR/SHA256SUMS"
-sha256sum "$ISO" >"$SUM"
+(cd "$(dirname "$ISO")" && sha256sum "$(basename "$ISO")") >"$SUM"
 
 gh release create "$TAG" "$ISO" "$SUM" \
     --title "DevOS ${TAG#v}" \
