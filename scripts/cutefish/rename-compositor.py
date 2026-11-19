@@ -28,22 +28,6 @@ def put(off, old, new, label):
     log.append(f"{label:<34} {off:#08x}  {old!r} -> {new!r}")
 
 
-def string8_to_size5(site, label):
-    """movabs 'Cutefish' + std::string size 8 -> 'DevOS' + size 5."""
-    put(site, b"Cutefish", b"DevOS", label)
-    lo, hi = site, site + 0xa0
-    pats = ((b"\x48\xc7\x84\x24", 8), (b"\x48\xc7\x44\x24", 5))  # movq $imm32, off(%rsp)
-    for pat, imm in pats:
-        i = data.find(pat, lo, hi)
-        while i != -1:
-            if data[i + imm:i + imm + 4] == b"\x08\x00\x00\x00":
-                data[i + imm:i + imm + 4] = b"\x05\x00\x00\x00"
-                log.append(f"{'  size 8 -> 5':<34} {i + imm:#08x}")
-                return
-            i = data.find(pat, i + 1, hi)
-    raise SystemExit(f"FAIL {label}: size store not found near {site:#x}")
-
-
 def output_name(site, label):
     """'Cutefish' + '-1' (size 10) -> 'DevOS-1' (size 7)."""
     put(site, b"Cutefish", b"DevOS-1\x00", label)
@@ -72,12 +56,15 @@ put(0x76f2fa, b"Cutefish\x00", b"DevOS", "notification app name")
 # --- 3. --help description ("Cutefish Wayland compositor") ---
 put(0x777650, b"Cutefish", b"DevOS", "help description")
 
-# --- 4. std::string("Cutefish") sites: inhibitor labels + icon theme default ---
-string8_to_size5(0x1b564d, "power button inhibitor")
-string8_to_size5(0x1c84ba, "sleep inhibitor")
-string8_to_size5(0x1c93c3, "icon theme default (shell)")
-string8_to_size5(0x5bdc4d, "icon theme default (switcher)")
-string8_to_size5(0x5ce0c5, "icon theme default (view)")
+# --- 4. icon theme defaults: DO NOT PATCH ---
+# 0x1b564d, 0x1c84ba, 0x1c93c3 are the three `Appearance/IconTheme` fallbacks
+# (shell.cpp + switcher/launchpad). Qt/FFI lookup ek theme ko uske *directory*
+# naam se dhoondta hai (/usr/share/icons/Cutefish), index.theme ka `Name=` se
+# nahi. Inhe "DevOS" karne par lookup /usr/share/icons/DevOS dhunta hai jo
+# exist nahi karta -> launcher/settings ke saare theme icons gayab (hicolor
+# wale bachte hain). Isliye yahan Cutefish hi rehta hai: dikhne wala naam
+# index.theme ke `Name=DevOS` se DevOS hi hai, andar ka id internal Cutefish.
+# (Pehle ye galti se "inhibitor labels" samajh kar patch ho rahe the.)
 
 # --- 5. X11 _NET_WM_NAME ---
 put(0x4031bc, b"Cutefish", b"DevOS", "X11 WM name")

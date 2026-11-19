@@ -6,11 +6,12 @@
 
 | Cheez | Value |
 |---|---|
-| File (latest) | `artifacts/devos-1.0-cutefish/devos-1.0-cutefish-amd64-r2.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| File (latest) | `artifacts/devos-1.0-cutefish/devos-1.0-cutefish-amd64-r6.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
 | Size | 1.5 GB |
-| sha256 | `0d549bcb7fb2afe92e2e288684fd501030ebf70696f8d54a03bfafe3a6a3ace4` |
+| sha256 | `788e2edc489428cdbea50886897ceb8952e6759ce68785e04afabab8c094ada3` |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos`, autologin |
-| Purana ISO | `devos-1.0-cutefish-amd64.iso` (sha `db16fbf4…efddad`) — delete nahi kiya, reference ke liye rakha |
+| VM verified | r6 live boot: dock + launcher grid ke **saare theme icons render** (`/tmp/opencode/r6-1.png`, `r6-launcher.png`); Appearance list me ek hi entry DevOS |
+| Purana ISO | r2..r5 + `devos-1.0-cutefish-amd64.iso` — delete nahi kiye, reference ke liye rakhe |
 
 ## Compositor = apna Wayland (`devos-compositor`)
 
@@ -49,7 +50,13 @@ Cutefish compositor ko DevOS naam par fork/rename kiya (open source, attribution
 - **Login screen (DM):** "DevOS" branding; live user full name "DevOS Live user" (`live-config` defaults patched, pehle "Debian Live user").
 - **Settings → About:** logo DevOS, title **DevOS**, "Running on DevOS 1.0" (`cutefish-settings` ke hard-coded `Label("Cutefish")` ko patch kiya: literal + std::string size 8→5).
 - **Settings → Open-Source Licenses:** section "DevOS", source link `https://devos.local/licenses`.
-- **Icon theme:** folder `Cutefish/` par `Name=DevOS` — Appearance me "DevOS" dikhta hai.
+- **Icon theme:** asli folder ab `/usr/share/icons/DevOS` (index.theme `Name=DevOS`), plus
+  `/usr/share/icons/Cutefish` sirf **hidden compat alias** (`Inherits=DevOS`, `Hidden=true`, koi
+  `Directories` nahi) — purane `Cutefish` id wale lookups resolve hote hain, Appearance list me
+  ek hi entry "DevOS" dikhti hai.
+  **Bug jo tha:** directory ka naam `Cutefish` tha par `index.theme` me `Name=DevOS`; toolkit
+  (`IconLoader::theme()`) icons directory-name se dhoondta hai, isliye theme icons missing the
+  (hicolor ke PNG chalte the) — r6 me fix + VM verified.
 - **Installer:** "Install DevOS", localized strings bhi ("Instalar o DevOS"), DevOS wallpaper.
 - **Launcher/app grid:** Calculator, Calendar, Chromium, Fcitx 5, Files, Install DevOS, Preview, Settings, System Monitor, Terminal, Text Editor, Video Player — koi Cutefish naam nahi.
 - **Wallpaper default:** DevOS artwork; Cutefish betta wallpaper replace; `default-cutefish.jpg` → `wallpaper-0.jpg`.
