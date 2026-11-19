@@ -2,8 +2,9 @@
 Description=Daily DevOS update metadata refresh
 
 [Timer]
+OnBootSec=2min
 OnCalendar=daily
-RandomizedDelaySec=6h
+RandomizedDelaySec=30min
 Persistent=true
 Unit=devos-update.service
 

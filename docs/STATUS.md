@@ -21,7 +21,7 @@
 |---|---|
 | APT repository | `https://devprakashvarma07.github.io/devos` (signed, HTTPS, GitHub Pages) |
 | Signing | archive key in `devos-keyring`; `InRelease` + `Release.gpg` verified with `gpgv` |
-| Update tool | `devos-update` (1.0.4) `version/status/check/upgrade/security`, daily `devos-update.timer` |
+| Update tool | `devos-update` (1.0.5) `version/status/check/upgrade/security`; timer checks 2 min after boot and daily |
 | App grid | **DevOS Update** launcher (`devos-update.desktop`) opens the interactive update menu |
 | Automatic | Debian security + DevOS stable updates via `unattended-upgrades` (no auto reboot) |
 | Hardening | nftables default-deny inbound, kernel/network sysctl, AppArmor, time sync, no core dumps |

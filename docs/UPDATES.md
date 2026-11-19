@@ -100,6 +100,12 @@ devos-update status
 After that the device follows the normal automatic-update policy. Images from r8 onward already
 contain these packages.
 
+## When checks run
+
+`devos-update.timer` triggers a metadata refresh two minutes after boot and then daily
+(`OnCalendar=daily`, `RandomizedDelaySec=30min`, `Persistent=true`), so a fresh install picks up
+the latest packages without waiting for the next day.
+
 ## App grid entry
 
 `devos-update` installs a **DevOS Update** launcher (`/usr/share/applications/devos-update.desktop`).
