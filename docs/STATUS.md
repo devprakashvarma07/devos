@@ -24,7 +24,8 @@
 | Update tool | `devos-update status/check/upgrade/security`, daily `devos-update.timer` |
 | Automatic | Debian security + DevOS stable updates via `unattended-upgrades` (no auto reboot) |
 | Hardening | nftables default-deny inbound, kernel/network sysctl, AppArmor, time sync, no core dumps |
-| Verified | live `InRelease` signature valid; end-to-end: installed system upgraded 1.0.0 → 1.0.1 from the live repo |
+| Verified | live `InRelease` signature valid; end-to-end: installed system upgraded 1.0.0 → 1.0.1 → 1.0.2 from the live repo |
+| Automatic scope | Debian `trixie`, `trixie-updates`, `trixie-security` and DevOS stable; codenames pinned explicitly because `os-release` sets `VERSION_CODENAME=devos` |
 
 Release process: [`UPDATES.md`](UPDATES.md). Defaults and limitations: [`SECURITY.md`](SECURITY.md).
 

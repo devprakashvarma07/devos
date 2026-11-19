@@ -41,8 +41,12 @@ AppArmor, SSH, Secure Boot, disk encryption and pending upgrades.
 
 `unattended-upgrades` is configured for:
 
-- `origin=Debian,label=Debian` and `label=Debian-Security` (Debian security and stable updates)
+- `origin=Debian,label=Debian` for `trixie` and `trixie-updates`
+- `origin=Debian,label=Debian-Security` for `trixie-security`
 - `origin=DevOS,label=DevOS,suite=stable`
+
+The Debian codenames are pinned explicitly: DevOS sets `VERSION_CODENAME=devos` in
+`os-release`, so the usual `${distro_codename}` expansion would not match the Debian suites.
 
 Kernel and header packages are excluded from unattended upgrades so a bad kernel cannot silently
 break boot; they are installed by `devos-update upgrade`, and the previous kernel stays in GRUB.

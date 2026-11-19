@@ -1,8 +1,11 @@
-// DevOS: apply security updates automatically, never reboot on its own.
+// DevOS: apply Debian security/stable and DevOS updates automatically.
+// DevOS os-release uses VERSION_CODENAME=devos, so ${distro_codename} does not
+// match the Debian suites. Pin the Debian 13 base codename explicitly.
 Unattended-Upgrade::Origins-Pattern {
+    "origin=Debian,codename=trixie,label=Debian";
+    "origin=Debian,codename=trixie-updates,label=Debian";
+    "origin=Debian,codename=trixie-security,label=Debian-Security";
     "origin=DevOS,label=DevOS,suite=stable";
-    "origin=Debian,codename=${distro_codename},label=Debian-Security";
-    "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
 };
 Unattended-Upgrade::Package-Blacklist {
     "linux-image-";
