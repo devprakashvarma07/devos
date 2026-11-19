@@ -83,6 +83,23 @@ curl -fsS https://devprakashvarma07.github.io/devos/dists/stable/InRelease | hea
 ./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r7.iso
 ```
 
+## Existing installations
+
+Images built before the signed repository existed do not ship `devos-keyring`. Enable the update
+channel once, on the machine itself:
+
+```bash
+# copy the two .deb files from the release media or download them from the repository
+sudo dpkg -i devos-keyring_*.deb devos-update_*.deb
+sudo apt-get update
+sudo apt-get install -y unattended-upgrades apt-listchanges needrestart apparmor-profiles
+sudo systemctl enable --now devos-update.timer
+devos-update status
+```
+
+After that the device follows the normal automatic-update policy. Images from r8 onward already
+contain these packages.
+
 ## Client commands
 
 ```bash

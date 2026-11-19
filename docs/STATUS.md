@@ -6,12 +6,27 @@
 
 | Item | Value |
 |---|---|
-| File (latest) | `artifacts/devos-1.0/devos-1.0-amd64-r7.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
-| Size | 1.4 GiB (1,461,190,656 B) |
-| sha256 | `4eb1fc608a8db845d9e408a00df72b6becef8a799a79e529257b87e09d72e390` |
+| File (latest) | `devos-1.0-amd64-r8.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| Size | 1.4 GiB (1,464,336,384 B) |
+| sha256 (r8) | `c1face4aa271a68c11f573a6734ecd94ca19c4f7b4e3f6b83b4aad4d741895a0` |
+| r8 changes | ships `devos-keyring`, `devos-update`, unattended security upgrades and the hardening baseline |
+| r7 (previous) | `4eb1fc608a8db845d9e408a00df72b6becef8a799a79e529257b87e09d72e390` |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos`, autologin |
 | Live verified | Dock and launcher grid render all theme icons; Appearance lists one entry, **DevOS** |
 | Browser | NetSurf 3.11 (≈6 MB) with DevOS icon and default web handler; HTTPS and `.deb` download verified |
+
+## Updates and security
+
+| Item | Value |
+|---|---|
+| APT repository | `https://devprakashvarma07.github.io/devos` (signed, HTTPS, GitHub Pages) |
+| Signing | archive key in `devos-keyring`; `InRelease` + `Release.gpg` verified with `gpgv` |
+| Update tool | `devos-update status/check/upgrade/security`, daily `devos-update.timer` |
+| Automatic | Debian security + DevOS stable updates via `unattended-upgrades` (no auto reboot) |
+| Hardening | nftables default-deny inbound, kernel/network sysctl, AppArmor, time sync, no core dumps |
+| Verified | live `InRelease` signature valid; chroot `apt-get update` fetches the DevOS suite |
+
+Release process: [`UPDATES.md`](UPDATES.md). Defaults and limitations: [`SECURITY.md`](SECURITY.md).
 
 ## Install to disk (verified)
 
@@ -80,3 +95,8 @@ The original exFAT storage partition contained no files (512 KiB of filesystem m
 5. **Secure Boot** — the installed GRUB chain is signed, but the kernel package in the image is
    unsigned; Secure Boot is disabled on the target laptop. Do not enable it without signing the
    kernel.
+6. **r8 boot test** — r8 adds packages and configuration to the verified r7 rootfs; the squashfs
+   and package contents were checked, a full virtual-machine boot test is still pending.
+7. **Existing r7 installs** — they do not have `devos-keyring` yet, so the update channel must be
+   enabled once by hand (`docs/UPDATES.md`, "Existing installations"). Fresh r8 installs need no
+   action.
