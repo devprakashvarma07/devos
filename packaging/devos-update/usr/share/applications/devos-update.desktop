@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=DevOS Update
+GenericName=Software Update
+Comment=Check for and install DevOS updates
+Exec=/usr/bin/x-terminal-emulator -e /usr/bin/devos-update-tui
+Icon=devos-update
+Terminal=false
+Categories=System;Settings;
+Keywords=update;upgrade;software;security;
+StartupNotify=true

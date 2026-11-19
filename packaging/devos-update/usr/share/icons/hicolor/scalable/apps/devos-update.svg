@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="DevOS Update">
+  <title>DevOS Update</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5AA0FF"/>
+      <stop offset="1" stop-color="#2F6FE0"/>
+    </linearGradient>
+  </defs>
+  <rect x="3" y="3" width="58" height="58" rx="14" fill="url(#bg)"/>
+  <g fill="none" stroke="#F8FAFF" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 27a13 13 0 0 1 22.5-7.2"/>
+    <path d="M41.5 13.2v6.8h-6.8"/>
+    <path d="M45 37a13 13 0 0 1-22.5 7.2"/>
+    <path d="M22.5 50.8V44h6.8"/>
+  </g>
+  <circle cx="32" cy="32" r="4.2" fill="#F8FAFF"/>
+</svg>

@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# devos-update-tui — chhota interactive update menu (terminal me chalta hai)
+set -uo pipefail
+
+STATE=/var/lib/devos-update
+VERSION="$(/usr/bin/devos-update version 2>/dev/null | awk '{print $2}')"
+[ -n "$VERSION" ] || VERSION="unknown"
+
+if [ "$(id -u)" -eq 0 ]; then
+    SUDO=""
+else
+    SUDO="sudo"
+fi
+
+pause() {
+    printf '\nEnter dabao continue karne ke liye...'
+    read -r _ || true
+    echo
+}
+
+pending_count() {
+    apt-get -s upgrade 2>/dev/null | grep -c '^Inst ' || true
+}
+
+show_header() {
+    clear 2>/dev/null || true
+    printf '==============================================\n'
+    printf '              DevOS Update\n'
+    printf '==============================================\n'
+    printf '  tool version : %s\n' "$VERSION"
+    printf '  last check   : %s\n' "$(cat "$STATE/last-check" 2>/dev/null || echo never)"
+    printf '  last upgrade : %s\n' "$(cat "$STATE/last-upgrade" 2>/dev/null || echo never)"
+    printf '  pending      : %s\n' "$(pending_count)"
+    [ -f /var/run/reboot-required ] && printf '  reboot       : required\n'
+    printf '==============================================\n\n'
+}
+
+do_check() {
+    echo "Package lists refresh ho rahi hain..."
+    $SUDO /usr/bin/devos-update check
+    pause
+}
+
+do_upgrade() {
+    echo "Saare available updates install honge (config files safe rahengi)."
+    printf 'Continue? [y/N] '
+    read -r ans || true
+    case "$ans" in
+        y|Y) ;;
+        *) echo "cancel"; pause; return ;;
+    esac
+    $SUDO /usr/bin/devos-update upgrade
+    pause
+}
+
+do_security() {
+    echo "Sirf security updates install honge."
+    printf 'Continue? [y/N] '
+    read -r ans || true
+    case "$ans" in
+        y|Y) ;;
+        *) echo "cancel"; pause; return ;;
+    esac
+    $SUDO /usr/bin/devos-update security
+    pause
+}
+
+do_status() {
+    /usr/bin/devos-update status
+    echo
+    echo "Upgradable packages:"
+    apt list --upgradable 2>/dev/null | sed '1d' | head -30 || true
+    pause
+}
+
+while true; do
+    show_header
+    cat <<'MENU'
+  1) Check for updates
+  2) Install all updates
+  3) Install security updates only
+  4) Show details
+  q) Quit
+MENU
+    printf '\nChoice: '
+    read -r choice || exit 0
+    case "$choice" in
+        1) do_check ;;
+        2) do_upgrade ;;
+        3) do_security ;;
+        4) do_status ;;
+        q|Q) exit 0 ;;
+        *) ;;
+    esac
+done

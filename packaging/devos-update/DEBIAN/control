@@ -1,11 +1,12 @@
 Package: devos-update
-Version: 1.0.2
+Version: 1.0.4
 Architecture: all
 Maintainer: DevOS <security@devos.local>
 Section: admin
 Priority: optional
 Depends: apt, systemd, ca-certificates, gnupg, unattended-upgrades
-Recommends: apt-listchanges, needrestart
+Recommends: apt-listchanges, needrestart, x-terminal-emulator
 Description: Safe update manager for DevOS
- Provides the devos-update command, a daily metadata refresh timer and
- secure defaults for unattended security upgrades.
+ Provides the devos-update command, a "DevOS Update" launcher in the app
+ grid, a daily metadata refresh timer and secure defaults for unattended
+ security upgrades.

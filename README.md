@@ -64,7 +64,7 @@ existing packages keep working. Details: [`docs/BRANDING.md`](docs/BRANDING.md) 
 DevOS ships a signed APT repository served over HTTPS by GitHub Pages
 (`https://devprakashvarma07.github.io/devos`). Installed systems trust it through the
 `devos-keyring` package, refresh package lists daily and install security updates
-automatically. Users can also run `devos-update`:
+automatically. Users can also open **DevOS Update** from the app grid or run `devos-update`:
 
 ```bash
 devos-update status        # timer, last run, pending packages

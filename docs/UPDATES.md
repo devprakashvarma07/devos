@@ -100,6 +100,18 @@ devos-update status
 After that the device follows the normal automatic-update policy. Images from r8 onward already
 contain these packages.
 
+## App grid entry
+
+`devos-update` installs a **DevOS Update** launcher (`/usr/share/applications/devos-update.desktop`).
+It opens the interactive menu in the terminal with the same actions as the CLI:
+
+```
+1) Check for updates
+2) Install all updates
+3) Install security updates only
+4) Show details
+```
+
 ## Client commands
 
 ```bash
