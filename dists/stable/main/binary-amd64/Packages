@@ -1,0 +1,33 @@
+Package: devos-keyring
+Version: 1.0.0
+Architecture: all
+Maintainer: DevOS <security@devos.local>
+Section: misc
+Priority: optional
+Depends: gpgv | gpg
+Description: DevOS package archive signing key and APT source
+ Installs the DevOS archive signing key and enables the official
+ DevOS package repository. Updates are verified with the signed
+ InRelease file over HTTPS.
+Filename: pool/main/d/devos-keyring/devos-keyring_1.0.0_all.deb
+Size: 1206
+MD5sum: 7f035b572717fc9e69cea026b5c0de0d
+SHA1: 79fea5b5b22d36f04125e46f54daf4e9e9f8ad72
+SHA256: 214547a8f71002b335842b8da8f102f3b1b5c367c44050c483a6671f645c8ffe
+
+Package: devos-update
+Version: 1.0.0
+Architecture: all
+Maintainer: DevOS <security@devos.local>
+Section: admin
+Priority: optional
+Depends: apt, systemd, ca-certificates, gnupg, unattended-upgrades
+Recommends: apt-listchanges, needrestart
+Description: Safe update manager for DevOS
+ Provides the devos-update command, a daily metadata refresh timer and
+ secure defaults for unattended security upgrades.
+Filename: pool/main/d/devos-update/devos-update_1.0.0_all.deb
+Size: 2604
+MD5sum: fc5414172796b95dd22f95adbb477bd4
+SHA1: 4fb8f53aed09c8684c6de551b449306377fe3636
+SHA256: a3acf3ba171ba9adf9b4d3e2b548fdb86c436b3e0543f426e4f59313705df45e
