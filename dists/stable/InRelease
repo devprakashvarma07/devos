@@ -6,28 +6,28 @@ Label: DevOS
 Suite: stable
 Codename: stable
 Version: 1.0
-Date: Thu, 19 Nov 2026 17:17:10 +0000
-Valid-Until: Sat, 19 Dec 2026 17:17:10 +0000
+Date: Thu, 19 Nov 2026 17:18:37 +0000
+Valid-Until: Sat, 19 Dec 2026 17:18:37 +0000
 Architectures: amd64
 Components: main
 Description: DevOS package archive
 Acquire-By-Hash: yes
 MD5Sum:
- 31f523417971dd63a5211e272c922695 1328 main/binary-amd64/Packages
- ce1b624b339b55ac554c094d4f9cd7c0 735 main/binary-amd64/Packages.gz
- bfff9dcced77bb3f0e5d3305a6a47e1e 812 main/binary-amd64/Packages.xz
+ 3973486edf396e26253ac41dd6a1e04c 1308 main/binary-amd64/Packages
+ 758cf5824dedb2da93d0bea9473837fc 725 main/binary-amd64/Packages.gz
+ 4c00ece8927dacf2faf11ee1da7dd40d 808 main/binary-amd64/Packages.xz
 SHA1:
- 07fcbd65cea2de0ec8341174c4c805a611b12ddc 1328 main/binary-amd64/Packages
- bca34273d6558050f1e60c62555803f4a0050c39 735 main/binary-amd64/Packages.gz
- 491de4b1656d424f27a15bb6d703bfe29a11501d 812 main/binary-amd64/Packages.xz
+ b062c9a6cc7b0e48be3de25c9c2736c3c42fb608 1308 main/binary-amd64/Packages
+ 1fdacff6d0619b3c6b4fae64df0fd1fea1258ce4 725 main/binary-amd64/Packages.gz
+ e838fe9fec35ccb7894a8b097d6a1a304f0e9092 808 main/binary-amd64/Packages.xz
 SHA256:
- c47981b53e974fcb222417bfe29cf33d0bee2cadc6f0f800a2eedb550cdf3c87 1328 main/binary-amd64/Packages
- 5244b5c5d6011396efbaa9b40357066770e9787b7b86e3b3f2ebc95333c9e436 735 main/binary-amd64/Packages.gz
- e56c5c5041f4762f70ffcb4a4f28bde9215243191b8a596d215a5ca020a55ff8 812 main/binary-amd64/Packages.xz
+ e03b4c56a4b3cde1a6cd2625834f6b993498746e8936d442a26087c4f55e84ea 1308 main/binary-amd64/Packages
+ e6007c7d88a4fb64f850eaca1d4725314abbef2c67b2ff977a5ee1e204a25ffe 725 main/binary-amd64/Packages.gz
+ d03c932c24bfb3f80d1883292c16cd69735fe08e19cd187918c856d46a6148aa 808 main/binary-amd64/Packages.xz
 -----BEGIN PGP SIGNATURE-----
 
-iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCav8vFgAKCRCrAe3eAP7C
-Sw5bAP46/Ya1k4TH4lSuRGdjJA1AHafO/49oRHgCfXUpm5KqGgD/dMJIRDGTJKij
-nGzp99MSXjeeAU0jwUPY9OQArxvq3AE=
-=HeAV
+iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCav8vbQAKCRCrAe3eAP7C
+SzV7APoCoZz+fVG6iaJ32PmrLMJyY+yLMwbe9zvU+ToVd3sXFgD/VcUh+FRCK0zk
+aBk/pk1KQxg24jAg9HX/yDBizdpwXgk=
+=RP4W
 -----END PGP SIGNATURE-----
