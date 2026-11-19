@@ -11,8 +11,9 @@ NOTES="${3:-DevOS $TAG}"
 
 [ -f "$ISO" ] || { echo "missing ISO: $ISO" >&2; exit 1; }
 
-SUM="$(mktemp)"
-trap 'rm -f "$SUM"' EXIT
+SUM_DIR="$(mktemp -d)"
+trap 'rm -rf "$SUM_DIR"' EXIT
+SUM="$SUM_DIR/SHA256SUMS"
 sha256sum "$ISO" >"$SUM"
 
 gh release create "$TAG" "$ISO" "$SUM" \
