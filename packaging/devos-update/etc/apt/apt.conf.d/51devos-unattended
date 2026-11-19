@@ -1,0 +1,15 @@
+// DevOS: apply security updates automatically, never reboot on its own.
+Unattended-Upgrade::Origins-Pattern {
+    "origin=DevOS,label=DevOS,suite=stable";
+    "origin=Debian,codename=${distro_codename},label=Debian-Security";
+    "origin=Debian,codename=${distro_codename}-security,label=Debian-Security";
+};
+Unattended-Upgrade::Package-Blacklist {
+    "linux-image-";
+    "linux-headers-";
+};
+Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+Unattended-Upgrade::MinimalSteps "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::SyslogEnable "true";

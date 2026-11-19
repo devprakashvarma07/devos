@@ -1,0 +1,8 @@
+// DevOS: safe APT defaults. Never overwrite local configuration files.
+Dpkg::Options {
+    "--force-confdef";
+    "--force-confold";
+};
+Acquire::Retries "3";
+Acquire::By-Hash "yes";
+APT::Get::Show-Upgraded "true";

@@ -1,0 +1,11 @@
+[Unit]
+Description=DevOS update metadata refresh
+Documentation=man:devos-update(8)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/devos-update check
+Nice=10
+IOSchedulingClass=idle

@@ -142,6 +142,27 @@ Boot the installed partition in QEMU with a snapshot so nothing is written:
   `/boot/efi` by UUID; if the test ESP has a different UUID, the installed system drops to
   emergency mode even though the real machine would boot fine.
 
+## 8. Updates and security
+
+Install the DevOS archive keyring and update manager from the release media or a local copy:
+
+```bash
+sudo dpkg -i devos-keyring_*.deb devos-update_*.deb
+sudo apt-get update
+sudo apt-get install -y unattended-upgrades apt-listchanges needrestart apparmor-profiles
+sudo systemctl enable --now devos-update.timer
+```
+
+Then apply and verify the security baseline:
+
+```bash
+sudo ./scripts/security/harden.sh
+sudo reboot           # sysctl, nftables and AppArmor apply at boot
+./scripts/security/audit.sh
+```
+
+`devos-update status` should report the timer as enabled and the DevOS source configured.
+
 ## Rollback
 
 The existing system is untouched and remains first in the boot order:

@@ -1,0 +1,11 @@
+Package: devos-keyring
+Version: 1.0.0
+Architecture: all
+Maintainer: DevOS <security@devos.local>
+Section: misc
+Priority: optional
+Depends: gpgv | gpg
+Description: DevOS package archive signing key and APT source
+ Installs the DevOS archive signing key and enables the official
+ DevOS package repository. Updates are verified with the signed
+ InRelease file over HTTPS.

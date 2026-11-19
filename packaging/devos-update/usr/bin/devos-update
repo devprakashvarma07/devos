@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# devos-update — safe update manager for DevOS
+set -euo pipefail
+
+STATE=/var/lib/devos-update
+mkdir -p "$STATE"
+
+say() { printf '==> %s\n' "$*"; }
+
+need_root() {
+    if [ "$(id -u)" -ne 0 ]; then
+        echo "devos-update: root required (try: sudo devos-update $1)" >&2
+        exit 1
+    fi
+}
+
+pending_count() {
+    apt-get -s upgrade 2>/dev/null | grep -c '^Inst ' || true
+}
+
+case "${1:-status}" in
+check)
+    need_root check
+    say "refreshing package lists"
+    apt-get update -o Acquire::Retries=3
+    date -u +%FT%TZ >"$STATE/last-check"
+    echo "pending upgrades: $(pending_count)"
+    apt list --upgradable 2>/dev/null | sed '1d' | head -40 || true
+    ;;
+upgrade)
+    need_root upgrade
+    say "refreshing package lists"
+    apt-get update -o Acquire::Retries=3
+    say "installing all available upgrades"
+    DEBIAN_FRONTEND=noninteractive apt-get -y \
+        -o Dpkg::Options::=--force-confdef \
+        -o Dpkg::Options::=--force-confold \
+        full-upgrade
+    apt-get -y autoremove --purge
+    date -u +%FT%TZ >"$STATE/last-upgrade"
+    say "done (reboot if the kernel or graphics stack changed)"
+    ;;
+security)
+    need_root security
+    say "applying security updates only"
+    apt-get update -o Acquire::Retries=3
+    if command -v unattended-upgrade >/dev/null 2>&1; then
+        unattended-upgrade -v
+    else
+        echo "unattended-upgrade not installed" >&2
+        exit 1
+    fi
+    date -u +%FT%TZ >"$STATE/last-upgrade"
+    ;;
+status)
+    echo "DevOS update status"
+    echo "  last check:   $(cat "$STATE/last-check" 2>/dev/null || echo never)"
+    echo "  last upgrade: $(cat "$STATE/last-upgrade" 2>/dev/null || echo never)"
+    echo "  pending:      $(pending_count)"
+    echo "  source:       $(grep -h '^deb ' /etc/apt/sources.list.d/devos.list 2>/dev/null | head -1 || echo 'not configured')"
+    if systemctl is-enabled devos-update.timer >/dev/null 2>&1; then
+        echo "  timer:        enabled"
+    else
+        echo "  timer:        disabled"
+    fi
+    ;;
+*)
+    cat >&2 <<'USAGE'
+usage: devos-update <command>
+
+  check      refresh package lists and show pending upgrades
+  upgrade    install all available upgrades (keeps existing config files)
+  security   apply security updates only (unattended-upgrade)
+  status     show timer state, last runs and pending count
+USAGE
+    exit 2
+    ;;
+esac

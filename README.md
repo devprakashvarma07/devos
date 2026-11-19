@@ -23,13 +23,16 @@ Screenshots: [`screenshots/`](screenshots)
 
 ```
 branding/            DevOS logos, wallpapers, isolinux/plymouth art
+packaging/           DevOS .deb packages (archive keyring, update manager)
 scripts/
   boot-devOS.sh      boot the built ISO in QEMU/KVM
   desktop/           ISO build, squashfs, initrd and browser scripts
+  repo/              build, sign and publish the APT repository
+  security/          hardening and audit scripts
   devos-next/        from-source track helper scripts
 src/                 DevOS compositor work (compv2, layertest)
 base/                from-source base track (kernel config, packages, docs)
-docs/                build, branding, install and hardware documentation
+docs/                build, branding, install, update, security and hardware docs
 screenshots/         verified UI evidence
 ```
 
@@ -55,6 +58,43 @@ DevOS keeps the desktop UX intact and replaces every user-visible brand surface:
 Internal compatibility identifiers are intentionally left unchanged so sessions, portals and
 existing packages keep working. Details: [`docs/BRANDING.md`](docs/BRANDING.md) and
 [`docs/COMPOSITOR.md`](docs/COMPOSITOR.md).
+
+## Updates
+
+DevOS ships a signed APT repository served over HTTPS by GitHub Pages
+(`https://devprakashvarma07.github.io/devos`). Installed systems trust it through the
+`devos-keyring` package, refresh package lists daily and install security updates
+automatically. Users can also run `devos-update`:
+
+```bash
+devos-update status        # timer, last run, pending packages
+sudo devos-update check    # refresh lists, show upgrades
+sudo devos-update upgrade  # install all upgrades
+```
+
+Releasing an update is one publish step:
+
+```bash
+./scripts/repo/build-packages.sh   # build .deb files
+./scripts/repo/build-repo.sh       # sign the repository
+./scripts/repo/publish.sh          # push to GitHub Pages
+```
+
+Architecture, key handling and the release checklist: [`docs/UPDATES.md`](docs/UPDATES.md).
+
+## Security
+
+A single hardening script applies a secure desktop baseline (kernel and network sysctl,
+nftables default-deny inbound, AppArmor, time sync, no core dumps), and a read-only audit
+script reports the state:
+
+```bash
+sudo ./scripts/security/harden.sh
+./scripts/security/audit.sh
+```
+
+Threat model, automatic updates and current limitations (Secure Boot, disk encryption):
+[`docs/SECURITY.md`](docs/SECURITY.md).
 
 ## Install
 

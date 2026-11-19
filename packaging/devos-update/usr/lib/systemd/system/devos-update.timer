@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily DevOS update metadata refresh
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=6h
+Persistent=true
+Unit=devos-update.service
+
+[Install]
+WantedBy=timers.target
