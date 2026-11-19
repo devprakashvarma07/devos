@@ -1,100 +1,76 @@
-# Branding DevOS on top of Cutefish
+# Branding DevOS
 
-Goal: **keep the Cutefish UI/UX exactly as-is**, replace every user-visible brand string/asset with
-DevOS. Internal identifiers (binary names, D-Bus names, `/usr/share/cutefish-*` paths) stay
-untouched so session, portals and updates keep working.
+Goal: keep the desktop UX exactly as-is and replace every **user-visible** brand string or asset
+with DevOS. Internal identifiers (binary names, D-Bus names, data paths) stay untouched so the
+session, portals and package updates keep working.
 
-## 1. Assets
+## Assets
 
-| Destination | Content |
+| Surface | DevOS replacement |
 |---|---|
-| `/usr/share/backgrounds/cutefishos/default.jpg` | DevOS wallpaper |
-| `/usr/share/backgrounds/cutefishos/wallpaper-11.jpg` | DevOS artwork (replaces the Cutefish fish wallpaper) |
-| `/usr/share/cutefish-settings/images/logo.svg` | DevOS wordmark (Settings → About) |
-| `/usr/share/plymouth/themes/devos-logo/logo.png` | DevOS wordmark (boot splash) |
-| `/boot/grub/themes/devos/` | GRUB theme (renamed from `cutefish`) |
-| ISO `isolinux/splash.png` | DevOS boot splash with menu hints |
+| Default wallpaper | DevOS artwork (replaces the upstream default) |
+| Settings → About logo | DevOS wordmark |
+| Plymouth theme | `devos-logo` (DevOS wordmark) |
+| GRUB theme | `devos` |
+| ISO isolinux splash | DevOS artwork with menu hints |
 
-Plymouth theme directory was renamed `cutefish-logo` → `devos-logo` and the theme file/script
-renamed inside; then the initrd must be regenerated (the theme is copied into it).
+The plymouth theme directory and its files were renamed and the initrd regenerated, because the
+theme is copied into the initramfs.
 
-## 2. Text
+## Visible strings
 
-| File | Change |
+| Surface | DevOS value |
 |---|---|
-| `/etc/os-release`, `/usr/lib/os-release`, `/etc/lsb-release`, `/etc/issue` | `PRETTY_NAME="DevOS 1.0"`, `NAME="DevOS"`, `ID=devos` |
-| `/usr/share/wayland-sessions/cutefish-wayland.desktop` | `Name=DevOS (Wayland)`, `DesktopNames=DevOS;` |
-| `/usr/bin/cutefish-wayland-session` | exports `XDG_*` = DevOS |
-| `/etc/xdg/autostart/cutefish-installer.desktop` | `Name=Install DevOS` |
-| `/usr/share/xdg-desktop-portal/portals/cutefish.portal` | `UseIn=DevOS;DevOS-Wayland;DevOS-wayland;` |
-| `/usr/share/xdg-desktop-portal/{devos,DevOS}-portals.conf` | portal impl config |
-| systemd units (`cutefish-*.service`) | `Description=DevOS …` |
-| polkit actions (`org.cutefish.*.policy`) | `<vendor>DevOS</vendor>`, `https://devos.local/` |
-| `/etc/passwd` | GECOS `DevOS login screen` |
+| `/etc/os-release`, `/etc/lsb-release`, `/etc/issue` | `PRETTY_NAME="DevOS 1.0"`, `NAME="DevOS"`, `ID=devos` |
+| Wayland session entry | `Name=DevOS (Wayland)`, `DesktopNames=DevOS;` |
+| Session environment | `XDG_CURRENT_DESKTOP=DevOS`, `XDG_SESSION_DESKTOP=DevOS` |
+| Autostart installer entry | `Name=Install DevOS` |
+| xdg-desktop-portal config | `UseIn=DevOS;DevOS-Wayland;DevOS-wayland;` |
+| systemd unit descriptions | `Description=DevOS …` |
+| polkit actions | vendor `DevOS`, home page `https://devos.local/` |
+| `/etc/passwd` GECOS | `DevOS login screen` |
+| Installer | "Install DevOS" in every shipped language |
 
-## 3. Binary strings
+## Settings → About
 
-Only strings **compiled into binaries** need in-place patching. Two rules:
+The About page title is hard-coded in `apps/settings/src/pages/about/aboutpage.cpp` and compiled
+as an 8-byte immediate plus a `std::string` size. Both the literal and the size field are patched
+(8 → 5 bytes) so the title renders as **DevOS**.
 
-- Replace a whole C string literal with a **shorter** DevOS string and NUL-pad the remainder.
-- Never shorten a string that is part of a merged `.rodata` blob unless you also shift/shorter-terminate
-  the tail; find the exact literal boundaries first (`strings -t x`, `objdump -d`).
+## Session identity
 
-### `cutefish-settings`
+The session manager used to overwrite `XDG_CURRENT_DESKTOP` after the session script set it. That
+literal is patched to `DevOS` (NUL-padded, 9-byte slot), plus a second inline `std::string`
+literal with the same content. As a result portals, screenshot tools and `fastfetch` all report
+DevOS.
 
-The About page title is hard-coded (`apps/settings/src/pages/about/aboutpage.cpp`:
-`Label("Cutefish")`) and compiled as an 8-byte immediate + `std::string` size 8:
+## Icon theme
 
-```text
-movabs $0x6873696665747543,%rax   ; "Cutefish"
-movq   $0x8,0x1b8(%rsp)           ; std::string size
-```
+The toolkit resolves icons by the theme **directory name** under `/usr/share/icons`, not by the
+`Name=` key in `index.theme`. The real theme directory is therefore `/usr/share/icons/DevOS`
+with `Name=DevOS`.
 
-Patch: immediate → `"DevOS\0\0\0"`, size word → `5`. The Open-Source Licenses section title and the
-source URL are patched the same way (8-byte immediate + size, and the URL string left-padded with
-NULs to keep the slot length).
+An alias directory (the legacy theme id) is kept for compatibility: it inherits DevOS and is
+marked hidden with no directory list, so stale references still resolve while
+Settings → Appearance shows exactly one entry, **DevOS**.
 
-### `cutefish-session`
+## Installer strings
 
-`desktop/cutefish-core/session/application.cpp` does:
+The installer binary uses localized strings; a case-aware sweep across `.desktop` files and
+translation catalogs covers the visible ones, including "Install DevOS" and the window title.
 
-```cpp
-setenv("XDG_CURRENT_DESKTOP", "Cutefish", 1);
-```
-
-That overrides the session script, so portals/fastfetch still reported Cutefish. The literal is
-patched to `"DevOS"` (NUL-padded, 9-byte slot). A second inline `std::string("Cutefish")` (size 8)
-is patched the same way; its help string is rewritten in place with NUL padding.
-
-Offsets are build-specific — re-locate with:
+## Verification
 
 ```bash
-grep -rn '"Cutefish' <source-clone>/apps <source-clone>/desktop | grep -v test
-strings -t x /usr/bin/<binary> | grep Cutefish
-objdump -d /usr/bin/<binary> | grep -A4 -B4 Cutefish
+# system identity
+cat /etc/os-release
+fastfetch
+xprop -id "$(xprop -root _NET_SUPPORTING_WM_CHECK | awk '{print $5}')" _NET_WM_NAME
+
+# icon theme list: exactly one entry, DevOS
+ls /usr/share/icons
+
+# app grid: every label starts with DevOS or an app name, no third-party brand
 ```
 
-## 3b. Compositor fork (`devos-compositor`)
-
-The Wayland compositor is shipped under DevOS naming; details, patch table and licensing rules are
-in [`COMPOSITOR.md`](COMPOSITOR.md). In short:
-
-- binary/process: `cutefish-compositor` → `devos-compositor` (+ compat symlink)
-- session manager: `cutefish-session` → `devos-session` (+ compat symlink)
-- session script: `cutefish-wayland-session` → `devos-wayland-session` (+ compat symlink)
-- Wayland socket: `cutefish-0` → `devos-0`
-- visible strings: `_NET_WM_NAME`, notification app/vendor, inhibitor label, `--help`, output names
-
-The session `.desktop` **filename stays** `cutefish-wayland.desktop` on purpose: the display manager
-(`cutefish-dm`) stores the autologin session id as `cutefish-wayland`, and the filename is not shown
-in the UI (the visible `Name=` is "DevOS (Wayland)").
-
-## 4. Integration details
-
-- Renaming `XDG_CURRENT_DESKTOP` touches three consumers: the portal `UseIn=`, screenshot
-  `OnlyShowIn=DevOS`, and fastfetch `de`/`wm`.
-- fastfetch `wm`/`terminal` report process names, so `~/.config/fastfetch` style overrides are used
-  instead of renaming executables: modules `wm` → "DevOS Compositor (Wayland)", `terminal` →
-  "DevOS Terminal".
-- The installer binary uses localized strings; a `sed s/Cutefish/DevOS/g` sweep across `.desktop`
-  and translation catalogs covers the visible ones.
+Screenshots of each surface are in [`../screenshots/`](../screenshots).

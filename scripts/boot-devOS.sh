@@ -15,7 +15,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # --- ISO: pehle artifact, warna build tree ---
-ISO="${ISO:-$ROOT/out/devos-1.0-cutefish-amd64.iso}"
+ISO="${ISO:-$ROOT/out/devos-1.0-amd64.iso}"
 [[ -f "$ISO" ]] || ISO="/mnt/devos/out/devos-1.0-amd64.iso"
 [[ -f "$ISO" ]] || { echo "ISO nahi mili: $ISO" >&2; exit 1; }
 

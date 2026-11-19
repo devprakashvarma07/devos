@@ -1,93 +1,82 @@
-# DevOS 1.0 — Cutefish-based track (status)
+# DevOS 1.0 — status
 
-**Date:** 2026-11-19 · **Base:** Cutefish OS nightly (Debian 13 trixie) · **UI/UX:** 100% Cutefish, sirf branding DevOS.
+**Date:** 2026-11-19 · **Base:** Debian 13 `trixie` · **Desktop:** DevOS (Qt/Wayland)
 
 ## ISO
 
-| Cheez | Value |
+| Item | Value |
 |---|---|
-| File (latest) | `artifacts/devos-1.0-cutefish/devos-1.0-cutefish-amd64-r7.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| File (latest) | `artifacts/devos-1.0/devos-1.0-amd64-r7.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
 | Size | 1.4 GiB (1,461,190,656 B) |
 | sha256 | `4eb1fc608a8db845d9e408a00df72b6becef8a799a79e529257b87e09d72e390` |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos`, autologin |
-| VM verified | r6/r7 live boot: dock + launcher grid ke **saare theme icons render**; Appearance list me ek hi entry DevOS |
-| Browser | Chromium **hata diya**, NetSurf 3.11 (≈6 MB) + apna icon + default handler — HTTPS aur `.deb` download VM me verified |
-| Purana ISO | r2..r6 + `devos-1.0-cutefish-amd64.iso` — delete nahi kiye, reference ke liye rakhe |
+| Live verified | Dock and launcher grid render all theme icons; Appearance lists one entry, **DevOS** |
+| Browser | NetSurf 3.11 (≈6 MB) with DevOS icon and default web handler; HTTPS and `.deb` download verified |
 
-## Compositor = apna Wayland (`devos-compositor`)
+## Install to disk (verified)
 
-Cutefish compositor ko DevOS naam par fork/rename kiya (open source, attribution ke saath):
+Installed alongside Ubuntu on the target laptop's NVMe, on a dedicated partition.
 
-| Surface | Pehle | Ab |
-|---|---|---|
-| Executable / process | `cutefish-compositor` | **`devos-compositor`** (+ compat symlink) |
-| Session manager | `cutefish-session` | **`devos-session`** (+ compat symlink) |
-| Session script | `cutefish-wayland-session` | **`devos-wayland-session`** (+ compat symlink) |
-| Wayland socket | `cutefish-0` | **`devos-0`** |
-| X11 `_NET_WM_NAME` | `Cutefish` | **`DevOS`** |
-| Notification app/vendor | `Cutefish` / `CutefishOS` | **`DevOS`** |
-| logind inhibitor label | `Cutefish` | **`DevOS`** |
-| Default output name | `Cutefish-1` | **`DevOS-1`** |
-| `--help` description | "Cutefish Wayland compositor" | **"DevOS"** |
+| Item | Value |
+|---|---|
+| Partition | `/dev/nvme0n1p2`, 38.7 GiB, ext4, label `DevOS` |
+| Root UUID | `874cb933-afa6-4b0b-8516-09d7c8e871ae` |
+| ESP | `/dev/nvme0n1p6` (shared with the existing system), UUID `B81B-4D10` |
+| EFI entry | `Boot0001* DevOS` → `\EFI\DevOS\shimx64.efi` |
+| Boot order | Ubuntu first (`0000`), DevOS second (`0001`) |
+| Account | `dev` (uid 1000), password set at install time |
+| Swap | 4 GiB `/swapfile` |
+| Verified | Installed system booted to the DevOS login screen, logged in, desktop and full app grid rendered (screenshots `25`–`27`) |
 
-**VM me verified (screenshots `17`–`19`):**
+The existing Ubuntu installation, its EFI entry, the NTFS data partition and the exFAT storage
+partition are untouched. The storage partition was reduced from 159 GiB to 120 GiB (it was empty)
+to make room; the new layout is documented in [`INSTALL.md`](INSTALL.md).
 
-- `pgrep -a devos` → `1133 /usr/bin/devos-session`, `1155 /usr/bin/devos-compositor --socket devos-0 …`
-- `xprop -id <wm-support> _NET_WM_NAME` → `"DevOS"`
-- `fastfetch` → `OS: DevOS 1.0`, `DE: DevOS`, `WM: DevOS Compositor (Wayland)`, `Terminal: DevOS Terminal`
-- Desktop boot + autologin working (DM autologin session-id `cutefish-wayland` hi rakha — filename UI me nahi dikhta, visible `Name=` "DevOS (Wayland)" hai)
+## Hardware (target laptop)
 
-**Jaan-boojh kar unchanged (internal, UI me nahi dikhta):** `org.cutefish.*` D-Bus names, `cutefish_shell` Wayland protocol, C++ namespace `cutefish::`, `/usr/share/cutefish-*` paths. Inko rename karne ke liye saare Cutefish apps/protocols ko ek saath badalna padega — alag migration hai.
+Intel Core i3-1215U (Alder Lake-U), Intel AX201 Wi-Fi + Bluetooth, ADL-P audio (Realtek ALC269),
+Intel UHD graphics, I2C-HID touchpad, Microdia USB camera.
 
-**Licensing:** Cutefish compositor open source hai (BSD-3 style headers; Chromium/Aura/Ash se derived — © Chromium Authors, ChromiumOS Authors, Reion Wong). Fork/rebrand allowed, lekin copyright + license notices aur source availability rakhna zaroori hai. `/usr/share/doc/cutefish-compositor/copyright` image me maujood hai.
-
-## Kya rebrand hua (verified screens)
-
-- **Boot (isolinux splash):** naya DevOS splash (`screenshots/15-isolinux-boot-devOS.png`). Purana Debian swirl/text `branding/backup-20261118/iso-splash.png` me backup.
-- **Plymouth splash:** `devos-logo` theme, DevOS wordmark (`16-plymouth-devos.png`); initrd me bhi wahi theme (`update-initramfs` se regenerate).
-- **GRUB theme:** `devos` (rootfs + ISO), entries "DevOS 1.0 Live".
-- **Session identity:** `XDG_CURRENT_DESKTOP=DevOS`, `XDG_SESSION_DESKTOP=DevOS` (session script + `cutefish-session` ke patched literals). Isse portal, screenshot, fastfetch sab DevOS.
-- **fastfetch:** `DE: DevOS`, `WM: DevOS Compositor (Wayland)`, `Terminal: DevOS Terminal` — aur actual process bhi `devos-compositor` hai.
-- **Login screen (DM):** "DevOS" branding; live user full name "DevOS Live user" (`live-config` defaults patched, pehle "Debian Live user").
-- **Settings → About:** logo DevOS, title **DevOS**, "Running on DevOS 1.0" (`cutefish-settings` ke hard-coded `Label("Cutefish")` ko patch kiya: literal + std::string size 8→5).
-- **Settings → Open-Source Licenses:** section "DevOS", source link `https://devos.local/licenses`.
-- **Icon theme:** asli folder ab `/usr/share/icons/DevOS` (index.theme `Name=DevOS`), plus
-  `/usr/share/icons/Cutefish` sirf **hidden compat alias** (`Inherits=DevOS`, `Hidden=true`, koi
-  `Directories` nahi) — purane `Cutefish` id wale lookups resolve hote hain, Appearance list me
-  ek hi entry "DevOS" dikhti hai.
-  **Bug jo tha:** directory ka naam `Cutefish` tha par `index.theme` me `Name=DevOS`; toolkit
-  (`IconLoader::theme()`) icons directory-name se dhoondta hai, isliye theme icons missing the
-  (hicolor ke PNG chalte the) — r6 me fix + VM verified.
-- **Installer:** "Install DevOS", localized strings bhi ("Instalar o DevOS"), DevOS wallpaper.
-- **Launcher/app grid:** Calculator, Calendar, Fcitx 5, Files, Install DevOS, NetSurf Web Browser, Preview, Settings, System Monitor, Terminal, Text Editor, Video Player — koi Cutefish naam nahi, Chromium hata diya.
-- **Browser (default):** NetSurf 3.11 (`netsurf-gtk`, ~6 MB installed) — halka, GTK, HTTPS + file download kaam karta hai; user isi se apni pasand ka browser (`.deb`) download kar sakta hai. Default web handler `/etc/xdg/mimeapps.list` se NetSurf hai. Script: `scripts/cutefish/install-browser.sh`.
-- **Hardware (target laptop):** Intel i3-1215U / AX201 Wi-Fi / ADL-P audio / UHD graphics / I2C-HID touchpad — saare drivers + firmware image me maujood (details `docs/HARDWARE.md`).
-- **Wallpaper default:** DevOS artwork; Cutefish betta wallpaper replace; `default-cutefish.jpg` → `wallpaper-0.jpg`.
-- **Portals:** `.portal` `UseIn=DevOS;DevOS-Wayland;DevOS-wayland;`, `devos-portals.conf` + `DevOS-portals.conf` symlink + generic `portals.conf`.
-- **System text:** os-release/lsb-release/issue = DevOS, systemd descriptions, polkit vendor DevOS, passwd GECOS, modprobe conf, apt sources (cutefish repo disabled/backup).
-
-## Backups (kuch bhi delete nahi hua)
-
-- `branding/backup-20261118/` — settings-logo, original wallpapers, plymouth themes, grub theme, desktop entries, apt sources, system files, `bin-final/` (purane `cutefish-settings`, `cutefish-session` binaries), `iso-splash.png`.
-- `branding/backup-20261118/compositor-rename-20261119/` — original `cutefish-compositor`, `cutefish-session`, `cutefish-wayland-session`, `cutefish-wayland.desktop`.
+All required drivers and firmware are present in the image (851 MB `/lib/firmware`, SOF topology,
+`intel-microcode`, `wireless-regdb`, `thermald`). Component-by-component mapping and on-machine
+verification commands: [`HARDWARE.md`](HARDWARE.md).
 
 ## Reproduce
 
 ```bash
-# rootfs mount: /mnt/devos (devos-build.img)
-sudo bash /run/media/dev/Data/DevOS/repos/devos/scripts/cutefish/mksq.sh   # squashfs (zstd-15)
-cd /mnt/devos && sudo bash ./make-iso.sh                                    # xorriso hybrid ISO
-# initrd sirf tab jab plymouth/initramfs badla ho:
-sudo bash /run/media/dev/Data/DevOS/repos/devos/scripts/cutefish/regen-initrd.sh
-# compositor rename (agar base rootfs se dobara shuru karo):
-sudo python3 /run/media/dev/Data/DevOS/repos/devos/scripts/cutefish/rename-compositor.py \
-  /usr/bin/cutefish-compositor /usr/bin/devos-compositor
+sudo ./scripts/desktop/mksq.sh          # rootfs -> filesystem.squashfs (zstd)
+sudo ./scripts/desktop/regen-initrd.sh  # if splash/session/initramfs changed
+sudo ./scripts/desktop/make-iso.sh      # hybrid BIOS+UEFI ISO
+./scripts/boot-devOS.sh                 # test in QEMU/KVM
 ```
 
-## Kholi hui cheezein (user decision chahiye)
+Disk install: see [`INSTALL.md`](INSTALL.md).
 
-1. **ISO 1.4 GB** — pehle target ≤800 MB tha; Cutefish/Qt base bhaari hai (Chromium hatane ke baad ~143 MB kam hua).
-2. **Install test** — abhi tak live boot verify hua (autologin + compositor + X11 name + browser). qcow2 par actual install + reboot verify pending hai.
-3. **Asli laptop par test** — Wi-Fi/audio/touchpad firmware image me hai, lekin virtual machine par verify nahi ho sakta; live USB se ek baar check karna baaki (`docs/HARDWARE.md` me commands).
-4. **Baaki internal names** — shell apps (`cutefish-core`, `cutefish-launchpad`, `cutefish-settings`, …) ke process/DBus naam abhi bhi cutefish hain; `ps`/System Monitor me dikhte hain. Compositor + session rename ho chuke hain; baaki ko rename karna bada cross-repo change hai.
-5. **Source rebuild** — abhi binary patching hai; long-term compositor ko source se build karke strings badalna hai (`docs/COMPOSITOR.md` me plan).
+## Backups
+
+Nothing from the previous system was deleted. Before partitioning, these were written to
+`backups/pre-install-<timestamp>/`:
+
+- `gpt-nvme0n1.bin` — full GPT backup (`sgdisk --backup`)
+- `efi-esp.tar.gz` — complete EFI system partition
+- `efibootmgr.txt` — previous UEFI boot entries and order
+- `host-fstab.txt` — previous `/etc/fstab`
+
+The original exFAT storage partition contained no files (512 KiB of filesystem metadata only).
+
+## Open items
+
+1. **ISO size** — 1.4 GiB; the Qt/Wayland desktop stack is heavy. Removing the bundled heavy
+   browser saved ~143 MB.
+2. **On-laptop hardware check** — firmware is in the image, but Wi-Fi/audio/touchpad cannot be
+   verified in a virtual machine. Boot the installed system or the live ISO on the laptop and run
+   the commands in [`HARDWARE.md`](HARDWARE.md).
+3. **Remaining internal process names** — some desktop helper processes still use legacy internal
+   identifiers. They are not user-visible in the UI but appear in `ps`/System Monitor; renaming
+   them is a larger lock-step change.
+4. **Compositor source rebuild** — the shipped compositor is a byte-verified fork of the packaged
+   binary; the long-term route is a source rebuild with the identity strings changed
+   (`docs/COMPOSITOR.md`).
+5. **Secure Boot** — the installed GRUB chain is signed, but the kernel package in the image is
+   unsigned; Secure Boot is disabled on the target laptop. Do not enable it without signing the
+   kernel.

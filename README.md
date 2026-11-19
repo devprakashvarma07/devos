@@ -1,23 +1,22 @@
 # DevOS
 
-**DevOS** is an x86_64 desktop Linux distribution. The desktop experience is built on the
-open-source **Cutefish** desktop (Qt/Wayland) — the UI, layout, animations and workflows are
-Cutefish's — while every user-visible surface is branded **DevOS**.
+**DevOS** is an x86_64 desktop Linux distribution built on a modern Qt/Wayland desktop stack.
+The boot splash, login screen, shell, settings, installer and every bundled application are
+branded **DevOS**.
 
-> Building in public. This repository holds the DevOS-specific code: build automation, branding
-> assets, rebranding tools, and the from-source compositor work. The distro base (Debian 13
-> userland) and the Cutefish desktop itself are upstream projects; see [Credits](#credits).
+> Building in public. This repository holds DevOS build automation, branding assets, installer
+> work and the DevOS Wayland compositor. The base userland is Debian 13 (`trixie`).
 
 ## Status
 
 | Item | Value |
 |---|---|
-| Version | DevOS 1.0 (Cutefish-based, live + installer) |
-| ISO size | 1.4 GiB (`devos-1.0-cutefish-amd64-r7.iso`) |
-| Browser | NetSurf 3.11 (lightweight); Chromium not shipped |
+| Version | DevOS 1.0 (live + installer) |
+| ISO size | 1.4 GiB (`devos-1.0-amd64-r7.iso`) |
+| Browser | NetSurf 3.11 (lightweight); no heavy browser bundled |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos` (autologin) |
-| Compositor | `devos-compositor` — rebranded fork of the Cutefish Wayland compositor |
-| Verified | Live boot, installer, Settings → About, fastfetch, boot splash, app grid |
+| Compositor | `devos-compositor` — the DevOS Wayland compositor |
+| Verified | Live boot, install-to-disk + reboot, login, app grid, hardware firmware coverage |
 | Artifacts | ISOs are **not** committed here (too large); build them with the scripts below |
 
 Screenshots: [`screenshots/`](screenshots)
@@ -28,58 +27,47 @@ Screenshots: [`screenshots/`](screenshots)
 branding/            DevOS logos, wallpapers, isolinux/plymouth art
 scripts/
   boot-devOS.sh      boot the built ISO in QEMU/KVM
-  cutefish/          ISO build + squashfs + initrd + rebranding tools
-                     (incl. rename-compositor.py for the DevOS compositor)
+  desktop/           ISO build, squashfs, initrd and browser scripts
   devos-next/        from-source track helper scripts
-src/                 our own compositor work (compv2, layertest)
+src/                 DevOS compositor work (compv2, layertest)
 base/                from-source base track (kernel config, packages, docs)
-docs/                build, branding and compositor-fork documentation
+docs/                build, branding, install and hardware documentation
 screenshots/         verified UI evidence
 ```
 
-The compositor fork is documented in [`docs/COMPOSITOR.md`](docs/COMPOSITOR.md): what was renamed,
-how the binary patches work, and the licensing/attribution rules that come with a fork.
-
-## Build (short version)
-
-The build works on a prepared root filesystem mounted at `/mnt/devos`:
+## Build
 
 ```bash
-sudo ./scripts/cutefish/mksq.sh          # rootfs -> live/filesystem.squashfs (zstd)
-sudo ./scripts/cutefish/regen-initrd.sh  # optional: regenerate initrd (plymouth/session changes)
-sudo ./scripts/cutefish/make-iso.sh      # xorriso hybrid ISO
+sudo ./scripts/desktop/mksq.sh          # rootfs -> live/filesystem.squashfs (zstd)
+sudo ./scripts/desktop/regen-initrd.sh  # optional: regenerate initrd (splash/session changes)
+sudo ./scripts/desktop/make-iso.sh      # xorriso hybrid ISO
 ./scripts/boot-devOS.sh                  # test in QEMU/KVM
 ```
 
-Details, prerequisites and the full branding sweep: [`docs/BUILD.md`](docs/BUILD.md) and
-[`docs/BRANDING.md`](docs/BRANDING.md).
+Full requirements and verification steps: [`docs/BUILD.md`](docs/BUILD.md).
 
-## Branding approach
+## Branding
 
-DevOS keeps the Cutefish UX intact. Branding is applied in three layers:
+DevOS keeps the desktop UX intact and replaces every user-visible brand surface:
 
-1. **Text/assets** — desktop entries, wallpapers, plymouth theme, GRUB/isolinux art, logos.
-2. **Session identity** — the session script exports `XDG_CURRENT_DESKTOP=DevOS` and
-   `XDG_SESSION_DESKTOP=DevOS`; the session manager is patched to match, so portals, screenshot and
-   system info report DevOS.
-3. **Compositor fork** — the Cutefish Wayland compositor ships as `devos-compositor` with DevOS
-   process name, X11 `_NET_WM_NAME`, notification identity and help text. See
-   [`docs/COMPOSITOR.md`](docs/COMPOSITOR.md).
-4. **In-place binary strings** — only where the string is compiled into a binary (e.g. the Settings
-   "About" title). The tools and exact approach are documented in `docs/BRANDING.md`.
+1. **Artwork** — wallpapers, boot splash, login screen, About page, installer.
+2. **Visible strings** — session identity, system info, app names, notifications.
+3. **Compositor identity** — process name, window-manager name, socket and help text.
 
-Internal identifiers (`org.cutefish.*` D-Bus names, the `cutefish_shell` protocol, C++ namespaces and
-`/usr/share/cutefish-*` paths) are intentionally unchanged — they are not user-visible, and renaming
-them requires lock-step changes in every Cutefish component. Old executable names stay as
-compatibility symlinks (`cutefish-compositor` → `devos-compositor`, and likewise for the session).
+Internal compatibility identifiers are intentionally left unchanged so sessions, portals and
+existing packages keep working. Details: [`docs/BRANDING.md`](docs/BRANDING.md) and
+[`docs/COMPOSITOR.md`](docs/COMPOSITOR.md).
 
-## Credits
+## Install
 
-- [Cutefish](https://github.com/cutefishos) — desktop environment (GPL-3.0 / BSD-3-Clause mixed)
-- The Cutefish compositor is itself derived from Chromium/Aura (Ash) code — © The Chromium Authors
-  and The ChromiumOS Authors; the fork keeps those notices and the packaged `copyright` file.
-- Debian — base userland and live-boot
-- Linux kernel, Qt, Wayland and the wider open-source ecosystem
+DevOS installs to a dedicated ext4 partition and adds its own UEFI boot entry, leaving an
+existing Linux installation and its boot entry untouched. See [`docs/INSTALL.md`](docs/INSTALL.md).
 
-DevOS-specific code and artwork in this repository are licensed under **GPL-3.0** unless noted
-otherwise (see [`LICENSE`](LICENSE)).
+## Licensing
+
+- DevOS-specific code, scripts and artwork are GPL-3.0 (see [`LICENSE`](LICENSE)).
+- The image includes third-party open-source components under their own licenses. Their
+  copyright notices and license texts are preserved inside the image under
+  `/usr/share/doc/*/copyright`. See [`NOTICE`](NOTICE).
+
+Screenshots are of DevOS itself; no third-party branding is shown in the user interface.

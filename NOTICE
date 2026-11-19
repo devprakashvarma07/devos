@@ -1,0 +1,16 @@
+# Third-party components
+
+DevOS is built on Debian 13 and includes open-source software from many upstream projects.
+
+Those components remain under their own licenses. Their copyright notices and license texts are
+preserved:
+
+- inside the installed image: `/usr/share/doc/<package>/copyright`
+- in the source packages published by each upstream project
+
+DevOS-specific code, build scripts and artwork in this repository are licensed under GPL-3.0
+(see `LICENSE`).
+
+No third-party branding is shown in the DevOS user interface. Product names, logos and trademarks
+that appear inside preserved copyright/license files are the property of their respective owners
+and are retained solely to satisfy those licenses.
