@@ -1,8 +1,6 @@
 # DevOS
 
 **DevOS** is an x86_64 desktop Linux distribution built on a modern Qt/Wayland desktop stack.
-The boot splash, login screen, shell, settings, installer and every bundled application are
-branded **DevOS**.
 
 > Building in public. This repository holds DevOS build automation, branding assets, installer
 > work and the DevOS Wayland compositor. The base userland is Debian 13 (`trixie`).
