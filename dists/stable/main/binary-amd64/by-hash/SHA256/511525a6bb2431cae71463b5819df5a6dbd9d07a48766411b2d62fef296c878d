@@ -1,0 +1,53 @@
+Package: devos-audio
+Version: 1.0.0
+Architecture: all
+Maintainer: DevOS <security@devos.local>
+Section: sound
+Priority: optional
+Depends: alsa-utils, pulseaudio-utils, pipewire, pipewire-pulse, pipewire-alsa, wireplumber
+Recommends: pavucontrol
+Description: Audio diagnostics and repair for DevOS
+ devos-audio reports the sound cards, kernel modules, firmware, PipeWire
+ nodes and mixer state, plays a test tone and applies safe repairs
+ (audio group, unmute, audio stack restart). Includes a "DevOS Audio"
+ launcher for the app grid.
+Filename: pool/main/d/devos-audio/devos-audio_1.0.0_all.deb
+Size: 4146
+MD5sum: 2f8c4e6d31104ac2a86520c614333ca9
+SHA1: e7665618878ce633ca09d40d435f7ec54e435171
+SHA256: 0bf07439362f830317d634aedd9edf475eacbd2a5fac4f21e38dda3241bdd23d
+
+Package: devos-keyring
+Version: 1.0.0
+Architecture: all
+Maintainer: DevOS <security@devos.local>
+Section: misc
+Priority: optional
+Depends: gpgv | gpg
+Description: DevOS package archive signing key and APT source
+ Installs the DevOS archive signing key and enables the official
+ DevOS package repository. Updates are verified with the signed
+ InRelease file over HTTPS.
+Filename: pool/main/d/devos-keyring/devos-keyring_1.0.0_all.deb
+Size: 1192
+MD5sum: 209b7a80a66839e56a04a3eff7f97129
+SHA1: 96663d6f12576da4016009fa0fbc4f7348a01d59
+SHA256: e38c1bd133ed70b2d4b9eaba07aee5fc54fd93a77f9cae5688cfa03ff52544ad
+
+Package: devos-update
+Version: 1.0.5
+Architecture: all
+Maintainer: DevOS <security@devos.local>
+Section: admin
+Priority: optional
+Depends: apt, systemd, ca-certificates, gnupg, unattended-upgrades
+Recommends: apt-listchanges, needrestart, x-terminal-emulator
+Description: Safe update manager for DevOS
+ Provides the devos-update command, a "DevOS Update" launcher in the app
+ grid, a daily metadata refresh timer and secure defaults for unattended
+ security upgrades.
+Filename: pool/main/d/devos-update/devos-update_1.0.5_all.deb
+Size: 4232
+MD5sum: ab5b99ee90b5c01d6e87c227d2951ee0
+SHA1: cfa9f88b32e2bd1ab16f948eb7a9de631d2c575b
+SHA256: 5a563df2ae79a8cd79d74b0e2ce3f30013e9c5a42c593d18bf421d6b679f17a3
