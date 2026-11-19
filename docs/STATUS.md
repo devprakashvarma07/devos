@@ -6,13 +6,13 @@
 
 | Item | Value |
 |---|---|
-| File (latest) | `devos-1.0-amd64-r8.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
-| Size | 1.4 GiB (1,464,336,384 B) |
-| sha256 (r8) | `c1face4aa271a68c11f573a6734ecd94ca19c4f7b4e3f6b83b4aad4d741895a0` |
-| r8 changes | ships `devos-keyring`, `devos-update`, unattended security upgrades and the hardening baseline |
-| r7 (previous) | `4eb1fc608a8db845d9e408a00df72b6becef8a799a79e529257b87e09d72e390` |
+| File (latest) | `devos-1.0-amd64-r9.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| Size | 1.4 GiB (1,469,054,976 B) |
+| sha256 (r9) | `39ba5afd983a22d58049d1702e8edc252cac02391281b4be4936b44d44c940a3` |
+| r9 changes | `devos-audio` 1.0.3 + `alsa-utils`/`pavucontrol`/`powermgmt-base`, `devos-update` 1.0.5, timezone pinned to `Asia/Kolkata` on the live cmdline (`patch-boot-config.sh`), `LANG=en_US.UTF-8`, `NetworkManager-wait-online` + `ModemManager` disabled, journald capped at 200 MB |
+| r8 (previous) | `c1face4aa271a68c11f573a6734ecd94ca19c4f7b4e3f6b83b4aad4d741895a0` |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos`, autologin |
-| Live verified | r8 live boot (KVM): DevOS desktop, dock and installer language step render correctly; r7: theme icons + single Appearance entry |
+| Live verified | r9 live boot (KVM): desktop + installer render, top-bar clock correct (IST); serial-console session: `devos-audio test` produced non-silent output (peak ≈23708) — audio path works end to end; r8: desktop + dock + installer language step |
 | Browser | NetSurf 3.11 (≈6 MB) with DevOS icon and default web handler; HTTPS and `.deb` download verified |
 
 ## Updates and security
