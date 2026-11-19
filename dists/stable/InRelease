@@ -6,28 +6,28 @@ Label: DevOS
 Suite: stable
 Codename: stable
 Version: 1.0
-Date: Thu, 19 Nov 2026 17:18:37 +0000
-Valid-Until: Sat, 19 Dec 2026 17:18:37 +0000
+Date: Thu, 19 Nov 2026 17:21:09 +0000
+Valid-Until: Sat, 19 Dec 2026 17:21:09 +0000
 Architectures: amd64
 Components: main
 Description: DevOS package archive
 Acquire-By-Hash: yes
 MD5Sum:
- 3973486edf396e26253ac41dd6a1e04c 1308 main/binary-amd64/Packages
- 758cf5824dedb2da93d0bea9473837fc 725 main/binary-amd64/Packages.gz
- 4c00ece8927dacf2faf11ee1da7dd40d 808 main/binary-amd64/Packages.xz
+ 1c689816a888ec4460935b828972b254 1308 main/binary-amd64/Packages
+ 14a15a7cbf478a72d8e1921ae64b68cc 722 main/binary-amd64/Packages.gz
+ 0f945a1f51f4a0ddd3abde78ac9919d5 804 main/binary-amd64/Packages.xz
 SHA1:
- b062c9a6cc7b0e48be3de25c9c2736c3c42fb608 1308 main/binary-amd64/Packages
- 1fdacff6d0619b3c6b4fae64df0fd1fea1258ce4 725 main/binary-amd64/Packages.gz
- e838fe9fec35ccb7894a8b097d6a1a304f0e9092 808 main/binary-amd64/Packages.xz
+ ee2a474d64572a34a8545383bb15a49ed789c4c8 1308 main/binary-amd64/Packages
+ e97ae7cb7c8924884c66324b51f67f7b7c6887c5 722 main/binary-amd64/Packages.gz
+ cdd5052490aa751348d9c7bdc9ec6d3616e7c6fb 804 main/binary-amd64/Packages.xz
 SHA256:
- e03b4c56a4b3cde1a6cd2625834f6b993498746e8936d442a26087c4f55e84ea 1308 main/binary-amd64/Packages
- e6007c7d88a4fb64f850eaca1d4725314abbef2c67b2ff977a5ee1e204a25ffe 725 main/binary-amd64/Packages.gz
- d03c932c24bfb3f80d1883292c16cd69735fe08e19cd187918c856d46a6148aa 808 main/binary-amd64/Packages.xz
+ a6ed3af3ba1ee7890aa0896e8abf66dc0d92b79510dccf5eb370043991e669d0 1308 main/binary-amd64/Packages
+ a8394f6ee9cb07da6f1d297769d6190ec09d8644a8efefa228e42ad3bd683762 722 main/binary-amd64/Packages.gz
+ c236a70ef81551809a5bc724a473319e801939b37ddebc06562f60c845b178fd 804 main/binary-amd64/Packages.xz
 -----BEGIN PGP SIGNATURE-----
 
-iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCav8vbQAKCRCrAe3eAP7C
-SzV7APoCoZz+fVG6iaJ32PmrLMJyY+yLMwbe9zvU+ToVd3sXFgD/VcUh+FRCK0zk
-aBk/pk1KQxg24jAg9HX/yDBizdpwXgk=
-=RP4W
+iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCav8wBQAKCRCrAe3eAP7C
+S3tcAP43LHwi+AneaDNVCBH+C5WqVXMHYbNf7r92z+BGC6mflQD+P15L4UQXDlP4
+BK60hL1bcAaK+ZuuFcTKpxdbTSKd0QE=
+=vPLd
 -----END PGP SIGNATURE-----

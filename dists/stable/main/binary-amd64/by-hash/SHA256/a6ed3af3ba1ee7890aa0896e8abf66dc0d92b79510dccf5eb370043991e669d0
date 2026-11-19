@@ -11,12 +11,12 @@ Description: DevOS package archive signing key and APT source
  InRelease file over HTTPS.
 Filename: pool/main/d/devos-keyring/devos-keyring_1.0.0_all.deb
 Size: 1192
-MD5sum: 6d9e170e33ab34dd6c1d9253b596ced9
-SHA1: a333eac8c5384bfcc133771eff8394e9e9b4ba0a
-SHA256: 756c61015543fd03be1cbda0db95416bf8493582ea695f675c0a848d4c5adc75
+MD5sum: bebb0f18760c22d39569fd7d8f25073f
+SHA1: 379b7d1070b3404e8bb4a7b75bcaa2bb94dd5e8e
+SHA256: 3def3a8bed6482ea5e4cb5dcbeed9557e9f1121a7e76e44dfa7f7529b654fac1
 
 Package: devos-update
-Version: 1.0.4
+Version: 1.0.5
 Architecture: all
 Maintainer: DevOS <security@devos.local>
 Section: admin
@@ -27,8 +27,8 @@ Description: Safe update manager for DevOS
  Provides the devos-update command, a "DevOS Update" launcher in the app
  grid, a daily metadata refresh timer and secure defaults for unattended
  security upgrades.
-Filename: pool/main/d/devos-update/devos-update_1.0.4_all.deb
-Size: 4212
-MD5sum: d361159489d53f9bca160fd626e73a61
-SHA1: f13b7e82c2af5a361225edb8fb97b1f116e05b1e
-SHA256: c77d04a2e9b5c21d11ce7ef5627f038e2a9e26447c4eac5aa686456030df273f
+Filename: pool/main/d/devos-update/devos-update_1.0.5_all.deb
+Size: 4232
+MD5sum: c9ce9ab92bb92b4052706e562cca6128
+SHA1: e8a7c75656436994887fb6315cfe66f7334894ea
+SHA256: 6f786a71f56590803f7489026abc8f0dc219cb5cf5b7c5829fd4aecb0bdb8e6b
