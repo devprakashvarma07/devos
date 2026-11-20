@@ -25,7 +25,8 @@
 | App grid | **DevOS Update** launcher (`devos-update.desktop`) opens the interactive update menu |
 | Automatic | Debian security + DevOS stable updates via `unattended-upgrades` (no auto reboot) |
 | Hardening | nftables default-deny inbound, kernel/network sysctl, AppArmor, time sync, no core dumps |
-| Verified | live `InRelease` signature valid; end-to-end: installed system upgraded 1.0.0 → 1.0.1 → 1.0.2 from the live repo |
+| Verified | live `InRelease` + `Release.gpg` `gpgv` Good signatures; end-to-end: installed system upgraded `devos-update` 1.0.0 → 1.0.1 → 1.0.2 → 1.0.4 → 1.0.5 and `devos-audio` 1.0.0 → 1.0.1 → 1.0.2 → 1.0.3 from the live repo |
+| Published | `devos-keyring 1.0.0`, `devos-update 1.0.5`, `devos-audio 1.0.3` (checksums match the `Packages` index) |
 | Automatic scope | Debian `trixie`, `trixie-updates`, `trixie-security` and DevOS stable; codenames pinned explicitly because `os-release` sets `VERSION_CODENAME=devos` |
 
 Release process: [`UPDATES.md`](UPDATES.md). Defaults and limitations: [`SECURITY.md`](SECURITY.md).
