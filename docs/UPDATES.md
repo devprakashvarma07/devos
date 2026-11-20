@@ -80,7 +80,8 @@ the old public key in the keyring package during the transition.
 curl -fsS https://devprakashvarma07.github.io/devos/dists/stable/InRelease | head
 
 # 5. ISO (optional): attach to a GitHub release, never to git
-./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r7.iso
+#    (existing tag par asset --clobber se upload hota hai, SHA256SUMS merge hota hai)
+./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r9.iso
 ```
 
 ## Existing installations

@@ -84,6 +84,7 @@ verification commands: [`HARDWARE.md`](HARDWARE.md).
 
 ```bash
 sudo ./scripts/desktop/mksq.sh          # rootfs -> filesystem.squashfs (zstd)
+sudo ./scripts/desktop/patch-boot-config.sh /mnt/devos/iso   # pin timezone= on the live cmdline
 sudo ./scripts/desktop/regen-initrd.sh  # if splash/session/initramfs changed
 sudo ./scripts/desktop/make-iso.sh      # hybrid BIOS+UEFI ISO
 ./scripts/boot-devOS.sh                 # test in QEMU/KVM
