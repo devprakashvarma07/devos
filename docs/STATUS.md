@@ -6,13 +6,14 @@
 
 | Item | Value |
 |---|---|
-| File (latest) | `devos-1.0-amd64-r9.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| File (latest) | `devos-1.0-amd64-r10.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
 | Size | 1.4 GiB (1,469,054,976 B) |
-| sha256 (r9) | `39ba5afd983a22d58049d1702e8edc252cac02391281b4be4936b44d44c940a3` |
-| r9 changes | `devos-audio` 1.0.3 + `alsa-utils`/`pavucontrol`/`powermgmt-base`, `devos-update` 1.0.5, timezone pinned to `Asia/Kolkata` on the live cmdline (`patch-boot-config.sh`), `LANG=en_US.UTF-8`, `NetworkManager-wait-online` + `ModemManager` disabled, journald capped at 200 MB |
-| r8 (previous) | `c1face4aa271a68c11f573a6734ecd94ca19c4f7b4e3f6b83b4aad4d741895a0` |
+| sha256 (r10) | `24bf761e5b305ca4bdcabdca7bad8fe7af045c2549d8d8f48b9a97fa943e0997` |
+| r10 changes | `devos-session` + `devos-compositor` string-view hardening (explicit-length suffix views retargeted, log/identity lengths corrected — full audit of all 11 rebranded binaries: 0 broken views); `/etc/skel` first-boot defaults baked from live user settings (dock icon size 34 + glass, tap-to-click, dark theme) |
+| r9 (previous) | `39ba5afd983a22d58049d1702e8edc252cac02391281b4be4936b44d44c940a3` — `devos-audio` 1.0.3 + `alsa-utils`/`pavucontrol`/`powermgmt-base`, `devos-update` 1.0.5, timezone pinned to `Asia/Kolkata` on the live cmdline (`patch-boot-config.sh`), `LANG=en_US.UTF-8`, `NetworkManager-wait-online` + `ModemManager` disabled, journald capped at 200 MB |
+| r8 | `c1face4aa271a68c11f573a6734ecd94ca19c4f7b4e3f6b83b4aad4d741895a0` |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos`, autologin |
-| Live verified | r9 live boot (KVM): desktop + installer render, top-bar clock correct (IST); serial-console session: `devos-audio test` produced non-silent output (peak ≈23708) — audio path works end to end; r8: desktop + dock + installer language step |
+| Live verified | **r10 live boot (KVM)**: full checklist — clock IST, skel defaults active (dock 34/glass, dark theme), journal 0 "Cannot persist", session input config auto-created with tap-to-click, session + compositor procs on socket `devos-0`, GUI app env `XDG_CURRENT_DESKTOP=DevOS` / `WAYLAND_DISPLAY=devos-0`, `devos-audio diagnose` ran, installer + desktop render (screendump); r9: desktop + installer render, top-bar clock correct (IST), audio path end to end; r8: desktop + dock + installer language step |
 | Browser | NetSurf 3.11 (≈6 MB) with DevOS icon and default web handler; HTTPS and `.deb` download verified |
 
 ## Updates and security
