@@ -6,16 +6,17 @@
 
 | Item | Value |
 |---|---|
-| File (latest) | `devos-1.0-amd64-r11.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
-| Size | 1.4 GiB (1,469,054,976 B) |
-| sha256 (r11) | `a3d1479f1d403854fecc61e34d865a01557441302c25a2795fe5b739d03d94c4` |
-| r11 changes | `devos-audio` **1.0.4**: default-sink repair (dummy/dead `auto_null` → real hardware + active streams moved + unmuted), new `repair` subcommand, `pa()` user-bus wrapper so `sudo devos-audio fix` works, WARNING/PROBLEM in `status`/`diagnose`/`test`, and a session guard (`devos-audio-guard.service`, enabled) that re-repairs the default sink at login and on every audio-stack restart |
+| File (latest) | `devos-1.0-amd64-r12.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| Size | 1.66 GiB (1,667,891,200 B) |
+| sha256 (r12) | `8c9bd5d77e188b6dee6caca0c593658672ef63f6e768ce341ba6487a47906175` |
+| r12 changes | `devos-audio` **1.0.5 + 1.0.6**: 1.0.5 — new `verify` (tone → real-sink `.monitor` capture → PASS/FAIL), new `ensure_output()` (unmute + volume floor <10%→50% + move streams stuck on `auto_null` to the default — now also runs on the "default sink OK" path), guard 1.0.5 same ensure on every restart; 1.0.6 — parsing fix (verbose `pactl list sink-inputs` "Input #N" lines have no `$3` — id is `$2` minus `#`; status/guard/main loops fixed); **Brave 157.1.99.57 preloaded** (cloned from this laptop's `/opt/brave.com/brave`), Brave = default browser (NetSurf kept); new `scripts/desktop/install-brave.sh`; zstd-compressed squashfs contains all of the above |
+| r11 | `devos-1.0-amd64-r11.iso` (1,469,054,976 B, sha256 `a3d1479f1d403854fecc61e34d865a01557441302c25a2795fe5b739d03d94c4`) — `devos-audio` **1.0.4**: default-sink repair (dummy/dead `auto_null` → real hardware + active streams moved + unmuted), new `repair` subcommand, `pa()` user-bus wrapper so `sudo devos-audio fix` works, WARNING/PROBLEM in `status`/`diagnose`/`test`, and a session guard that re-repairs the default sink at login and on every audio-stack restart; 32/32 audio suite on KVM |
 | r10 (previous) | `24bf761e5b305ca4bdcabdca7bad8fe7af045c2549d8d8f48b9a97fa943e0997` — `devos-session` + `devos-compositor` string-view hardening (explicit-length suffix views retargeted, log/identity lengths corrected — full audit of all 11 rebranded binaries: 0 broken views); `/etc/skel` first-boot defaults baked from live user settings (dock icon size 34 + glass, tap-to-click, dark theme) |
 | r9 | `39ba5afd983a22d58049d1702e8edc252cac02391281b4be4936b44d44c940a3` — `devos-audio` 1.0.3 + `alsa-utils`/`pavucontrol`/`powermgmt-base`, `devos-update` 1.0.5, timezone pinned to `Asia/Kolkata` on the live cmdline (`patch-boot-config.sh`), `LANG=en_US.UTF-8`, `NetworkManager-wait-online` + `ModemManager` disabled, journald capped at 200 MB |
 | r8 | `c1face4aa271a68c11f573a6734ecd94ca19c4f7b4e3f6b83b4aad4d741895a0` |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos`, autologin |
-| Live verified | **r11 live boot (KVM)**: 32/32 audio suite — guard active/enabled and ran at session start, default sink real at boot, `fix` 5-step e2e, forced-dummy → `repair`/`guard` switch back to real, `PartOf` (wireplumber restart → guard re-repairs), WARNING/PROBLEM branches, end-to-end sound (`devos-audio test` → wav 1,425,408 B, max\|sample\|=26226 = non-silent 40% sine), 0 "Cannot persist", dock 34; **r10**: full checklist — clock IST, skel defaults active (dock 34/glass, dark theme), journal 0 "Cannot persist", session input config auto-created with tap-to-click, session + compositor procs on socket `devos-0`, GUI app env `XDG_CURRENT_DESKTOP=DevOS` / `WAYLAND_DISPLAY=devos-0`, `devos-audio diagnose` ran, installer + desktop render (screendump); r9: desktop + installer render, top-bar clock correct (IST), audio path end to end; r8: desktop + dock + installer language step |
-| Browser | NetSurf 3.11 (≈6 MB) with DevOS icon and default web handler; HTTPS and `.deb` download verified |
+| Live verified | **r12 live boot (KVM): 40/40** — 27 audio checks (guard active/enabled/ran-at-start, default real at boot, `fix` 5-step, forced-dummy → `repair`/`guard`/`wireplumber-PartOf`, WARNING/PROBLEM branches, `devos-audio verify` = PASS with host-wav tone proof, end-to-end sound, 0 "Cannot persist", dock 34, `devos-audio 1.0.6` version) + 13 Brave/QEMU checks (browser binary 157.1.99.57, entry points, desktop + icons, Brave = default browser, `ldd` clean, headless launch); **r11**: 32/32 audio suite — guard active/enabled and ran at session start, default sink real at boot, `fix` 5-step e2e, forced-dummy → `repair`/`guard` switch back to real, `PartOf` (wireplumber restart → guard re-repairs), WARNING/PROBLEM branches, end-to-end sound (`devos-audio test` → wav 1,425,408 B, max\|sample\|=26226 = non-silent 40% sine), 0 "Cannot persist", dock 34; **r10**: full checklist — clock IST, skel defaults active (dock 34/glass, dark theme), journal 0 "Cannot persist", session input config auto-created with tap-to-click, session + compositor procs on socket `devos-0`, GUI app env `XDG_CURRENT_DESKTOP=DevOS` / `WAYLAND_DISPLAY=devos-0`, `devos-audio diagnose` ran, installer + desktop render (screendump); r9: desktop + installer render, top-bar clock correct (IST), audio path end to end; r8: desktop + dock + installer language step |
+| Browser | **Brave 157.1.99.57** (cloned from the laptop, not downloaded) preloaded in the image; default browser via `/etc/xdg/mimeapps.list`; NetSurf 3.11 (≈6 MB) installed but not default; HTTPS and `.deb` download verified |
 
 ## Updates and security
 
@@ -62,7 +63,49 @@ Alder Lake + ALC269 codec. Debian `trixie` has no newer `firmware-sof-signed` in
 | `sudo` fix | `pa()` wrapper runs all PipeWire/Pulse commands as `$SUDO_USER` with `XDG_RUNTIME_DIR=/run/user/<uid>` — root context previously broke `pactl`/`wpctl`/`systemctl --user` (seen in the laptop journal) |
 | Session guard | `devos-audio-guard.service` (user unit, enabled via `default.target.wants`, `PartOf=pipewire-pulse.service wireplumber.service`) re-repairs the default sink at login and on every audio-stack restart |
 | Verified | KVM live boot: **32/32 checks** — guard ran at session start, `fix`/`repair`/`guard`/`PartOf` all switch `auto_null` → `alsa_output.pci-0000_00_04.0.analog-stereo`, WARNING/PROBLEM branches correct, `devos-audio test` produced a non-silent wav (max\|sample\|=26226), 0 "Cannot persist" |
-| Install | live r11 image + installed system (chroot) + APT `devos-audio 1.0.4` |
+| Install | live r12 image + installed system (chroot) + APT `devos-audio 1.0.6` |
+
+## Audio fix — `devos-audio` 1.0.5 + 1.0.6 (2026-11-21, real-hardware gap close)
+
+The 1.0.4 forensics (real-boot journal, 2026-11-21 18:35–18:45) showed the sound
+stack itself was healthy — `snd_hda_intel` + `ALCA269`, real sink
+(`alsa_output.pci-0000_00_1f.3.analog-stereo`) detected and guard logged it —
+and `asound.state` had Speaker/Master unmuted — but the guard's "default sink
+ok" path only logged and never applied output. This gap is now closed:
+
+| Item | Value |
+|---|---|
+| New `ensure_output()` | On default sink: unmute, volume floor <10% → 50%, move sink-inputs stuck on `auto_null` back to the default — and it now runs even on the "default sink ok" path (1.0.4 ran it only on the repair path) |
+| Guard 1.0.5 + 1.0.6 | Uses `ensure_output()`; logs `default sink ok (...) + ensured: unmuted[, moved N stream(s) off dummy]`; 1.0.6 fixes the `Input #N` parsing so stuck-stream count/move actually works (was `$3`, no `$3` exists) |
+| New `verify` | End-to-end one-shot proof: check default sink (repair if needed) → `ensure_output()` → 3 s tone on default → capture `<sink>.monitor` with `parec` → PASS when max\|sample\| > 500. On real hardware: `PASS: audio path works end to end`. Exits 1 with `FAIL` otherwise — run it as `devos-audio verify` |
+| New `ensure_path` test (KVM, **27 audio checks pass**) | Force `auto_null` + stuck stream while default is real → `devos-audio status` shows WARNING → `devos-audio-guard` moves the stream back (`moved 1 stream(s) off dummy`) → stream back on real sink |
+| Translation | Install into live rootfs + dual-boot partition at build time, chroot into both; published to APT on `gh-pages` (`devos-audio 1.0.6`) |
+| KVM audio proof (r11, 16/16 → r12 kept) | `devos-audio test` → host wav grew, max\|sample\| = 26226; QEMU wav amplitude > 500 as before |
+
+## Browser — Brave preloaded (2026-11-21)
+
+Brave 157.1.99.57 **cloned** from the laptop's installed `/opt/brave.com/brave`
+(483 MB). The user asked for the installed Brave, not a download: download
+attempts from Brave's S3 had failed earlier on this network (truncated 25 MB
+file + DNS timeouts), so cloning is the verified-reliable path.
+
+| Item | Value |
+|---|---|
+| Rootfs | `/opt/brave.com/brave` + `/usr/bin/brave-browser{,-stable}` symlinks + `brave-browser.desktop` + hicolor icons + man + apparmor; `ldd` = 0 missing libs |
+| Dual boot (p2) | same files in `/` (nvme0n1p2), verified `ldd` clean |
+| Default | `/etc/xdg/mimeapps.list` (rootfs + p2): `x-scheme-handler/http/https` + `text/html` → `brave-browser.desktop` |
+| Install script | `scripts/desktop/install-brave.sh` — clone a local Brave tree (`/opt/brave.com/brave`) into the rootfs + symlinks + desktop + icons |
+| NetSurf | kept, not default (fallback browser; image slightly bigger than r11's NetSurf-only build) |
+| r12 KVM check (13) | binary `--version`, 2 entry points, desktop + 256x256 icon, default in mimeapps, `ldd` clean, headless launch |
+
+## Brave + ISO polish (2026-11-21)
+
+| Item | Value |
+|---|---|
+| ISO r12 | `devos-1.0-amd64-r12.iso` — 1,667,891,200 B, sha256 `8c9bd5d77e188b6dee6caca0c593658672ef63f6e768ce341ba6487a47906175` |
+| VM suite | 40/40 on KVM/QEMU (27 audio incl. `devos-audio verify` = PASS, 13 Brave/QEMU: binary + entry points + desktop + icons + default + `ldd` + headless launch) — transcript: `/tmp/opencode/r12-test-run.log` |
+| Artifacts | `artifacts/devos-1.0/devos-1.0-amd64-r12.iso` + `.sha256` — latest confirmed (also `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| Approval gate | Release ISO upload = ON HOLD until user says (`release-iso.sh` retry loop exists; do not run) |
 
 
 ## Install to disk (verified)
@@ -119,8 +162,7 @@ The original exFAT storage partition contained no files (512 KiB of filesystem m
 
 ## Open items
 
-1. **ISO size** — 1.4 GiB; the Qt/Wayland desktop stack is heavy. Removing the bundled heavy
-   browser saved ~143 MB.
+1. **ISO size** — 1.66 GiB; the Qt/Wayland desktop stack plus the 335 MB Brave is heavy.
 2. **On-laptop hardware check** — firmware is in the image, but Wi-Fi/audio/touchpad cannot be
    verified in a virtual machine. Boot the installed system or the live ISO on the laptop and run
    the commands in [`HARDWARE.md`](HARDWARE.md).

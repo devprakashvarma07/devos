@@ -81,7 +81,18 @@ curl -fsS https://devprakashvarma07.github.io/devos/dists/stable/InRelease | hea
 
 # 5. ISO (optional): attach to a GitHub release, never to git
 #    (existing tag par asset --clobber se upload hota hai, SHA256SUMS merge hota hai)
-./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r11.iso
+#    **release-iso.sh = ON HOLD until the user approves ISO upload** — do not run it
+#    without asking. devos-audio/Brave-only updates are released via steps 1–4, never ISO.
+./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r12.iso
+```
+
+**devos-audio 1.0.5 + 1.0.6 (r12, 2026-11-21)** — publish via the normal APT flow (steps 2–4);
+ISO push (step 5) holds until user approval. 1.0.6 = parsing fix (verbose
+`pactl list sink-inputs` "Input #N" — no `$3`; main + guard streams parsing).
+
+```
+./scripts/repo/build-repo.sh   # devos-audio 1.0.5 visible in Packages
+./scripts/repo/publish.sh
 ```
 
 ## Existing installations

@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# devos-audio-guard — session start par default sink ka watchdog
+# devos-audio-guard — session start par default sink + output ka watchdog
 # Hinglish: boot par WirePlumber ki fallback-sink race se default sink
 # auto_null (Dummy Output) ban jata hai (boot0 forensics: real sink 27s
 # late aaya, default dummy par atak gaya) — yeh guard session start par
 # aur audio stack restart par default ko wapas asli sink par laata hai.
+# 1.0.5: default "ok" hone par bhi unmute + volume floor + dummy par fase
+# streams move karta hai (real-hw me yeh gap mila tha).
 set -uo pipefail
 
 T=devos-audio
@@ -40,10 +42,48 @@ if [ -z "$real" ]; then
     exit 0
 fi
 
-# 3. default pehle se sahi hai to chhod do
+# 3. default pehle se sahi hai — phir bhi output ensure karo
+#    (unmute + volume floor + dummy par fase streams), warna "ok" log
+#    ke baad bhi khamoshi reh sakti thi.
 if [ -n "$default" ] && [ "$default" != "auto_null" ] && \
    pactl list short sinks 2>/dev/null | awk '{print $2}' | grep -qx "$default"; then
-    log "default sink ok: $default"
+    actions=""
+    # unmute
+    pactl set-sink-mute "$default" 0 2>/dev/null && actions="unmuted" || true
+    # volume floor (<10% -> 50%)
+    vol="$(pactl get-sink-volume "$default" 2>/dev/null \
+           | sed -n 's|.*/ *\([0-9][0-9]*\)%.*|\1|p' | head -1)"
+    if [ -n "$vol" ] && [ "$vol" -lt 10 ] 2>/dev/null; then
+        pactl set-sink-volume "$default" 50% 2>/dev/null && actions="$actions, vol ${vol}%->50%"
+    fi
+    # dummy sink par fase streams wapas default par
+    # (pehle gin lo — move ke baad count karoge to hamesha 0 aayega)
+    # verbose list me "Input #N" -> awk fields $1="Input", $2="#N" (no $3!) —
+    # isliye substr($2,2) se id lo, $3 se nahi (1.0.6 bug fix; suite me
+    # "stream stuck on dummy" ya STUCK=0 checks same tarah align kare hain).
+    stream_sink() { # index -> sink name
+        [ -n "${1:-}" ] || return 0
+        pactl list sink-inputs 2>/dev/null | awk -v id="$1" '
+            /^Input #/ {cur=$2; cur=substr(cur,2); show=(cur==id); next}
+            show && /^[[:space:]]*Sink:/ {print $2; exit}
+        '
+    }
+    ndummy="$(pactl list short sink-inputs 2>/dev/null \
+              | awk '{print $1}' | while read -r sid; do
+                    [ -n "$sid" ] || continue
+                    [ "$(stream_sink "$sid")" = "auto_null" ] && echo x
+                done | wc -l)"
+    pactl list short sink-inputs 2>/dev/null | awk '{print $1}' | while read -r sid; do
+        [ -n "$sid" ] || continue
+        [ "$(stream_sink "$sid")" = "auto_null" ] && \
+            pactl move-sink-input "$sid" "$default" 2>/dev/null
+    done
+    [ "${ndummy:-0}" -gt 0 ] && actions="$actions, moved $ndummy stream(s) off dummy"
+    if [ -n "$actions" ]; then
+        log "default sink ok ($default) + ensured: $actions"
+    else
+        log "default sink ok: $default"
+    fi
     exit 0
 fi
 
@@ -53,6 +93,7 @@ if pactl set-default-sink "$real" 2>/dev/null; then
         [ -n "$sid" ] && pactl move-sink-input "$sid" "$real" 2>/dev/null || true
     done
     pactl set-sink-mute "$real" 0 2>/dev/null || true
+    logger -t devos-audio "default sink repaired: ${default:-none} -> $real" 2>/dev/null || true
     log "repaired: '${default:-none}' -> $real"
 else
     log "set-default-sink $real failed"

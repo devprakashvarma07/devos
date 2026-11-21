@@ -1,5 +1,5 @@
 Package: devos-audio
-Version: 1.0.4
+Version: 1.0.6
 Architecture: all
 Maintainer: DevOS <security@devos.local>
 Section: sound
@@ -10,6 +10,9 @@ Description: Audio diagnostics and repair for DevOS
  devos-audio reports the sound cards, kernel modules, firmware, PipeWire
  nodes and mixer state, plays a test tone and applies safe repairs
  (audio group, unmute, audio stack restart, default sink repair from
- dummy/dead to the real sink). Includes a session guard unit that keeps
- the default sink pointed at real hardware, and a "DevOS Audio" launcher
- for the app grid.
+ dummy/dead to the real sink, volume floor, stray stream move). Includes
+ an end-to-end "verify" command (tone -> real sink capture -> PASS/FAIL),
+ a session guard unit that keeps the output ready at login and on every
+ audio-stack restart, and a "DevOS Audio" launcher for the app grid.
+ 1.0.6: parsing fix in status/guard move loop — verbose sink-inputs
+ "Input #N" lines have no $3 field (id is $2 minus '#').

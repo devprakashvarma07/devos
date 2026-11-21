@@ -3,7 +3,7 @@
 # Hinglish comments: user ko ek command me poora audio report chahiye.
 set -uo pipefail
 
-VERSION="1.0.4"
+VERSION="1.0.6"
 
 say()  { printf '==> %s\n' "$*"; }
 have() { command -v "$1" > /dev/null 2>&1; }
@@ -52,12 +52,71 @@ default_sink_bad() {
     return 1
 }
 
+# default sink par current volume % (pactl get-sink-volume, first channel)
+default_volume_pct() {
+    have pactl || { echo 100; return 0; }
+    pa pactl get-sink-volume "$(default_sink_name)" 2>/dev/null \
+        | sed -n 's|.*/ *\([0-9][0-9]*\)%.*|\1|p' | head -1
+}
+
 # wpctl inspect se description (status display ke liye)
 default_sink() {
     if have wpctl && pa wpctl status > /dev/null 2>&1; then
         pa wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null \
             | sed -n 's/^[[:space:]]*node.description = "\(.*\)"/\1/p' | head -1
     fi
+}
+
+# ---- stream helpers: kis stream kis sink par hai ----
+
+# kis stream kis sink par hai (robust — verbose list me "Input #N"
+# -> fields $1="Input", $2="#N"; id $1 se anya gate rakhna chahiye)
+stream_sink() { # stream-index -> sink name
+    [ -n "${1:-}" ] || return 0
+    pa pactl list sink-inputs 2>/dev/null | awk -v id="$1" '
+        /^Input #/ {cur=$2; cur=substr(cur,2); show=(cur==id); next}
+        show && /^[[:space:]]*Sink:/ {print $2; exit}
+    '
+}
+
+# auto_null (dummy) par fase streams ki sankhya
+dummy_streams() {
+    have pactl || { echo 0; return 0; }
+    pa pactl list short sink-inputs 2>/dev/null \
+        | awk '{print $1}' | while read -r sid; do
+            [ -n "$sid" ] || continue
+            [ "$(stream_sink "$sid")" = "auto_null" ] && echo x
+        done | wc -l
+}
+
+# default sink par guaranteed output: unmute + volume floor + dummy streams move.
+# Yeh1.0.5 ka naya core hai — guard aur fix dono isko call karte hain,
+# taki "default sink ok hone par bhi kuch na karne" wala gap khatam ho.
+ensure_output() {
+    local d vol n=0
+    have pactl || return 1
+    d="$(default_sink_name)"
+    [ -n "$d" ] || return 1
+
+    # 1. unmute
+    pa pactl set-sink-mute "$d" 0 2>/dev/null || true
+
+    # 2. volume floor — agar output practically inaudible (<10%) to 50% karo
+    vol="$(default_volume_pct)"
+    if [ -n "$vol" ] && [ "$vol" -lt 10 ] 2>/dev/null; then
+        pa pactl set-sink-volume "$d" 50% 2>/dev/null || true
+        echo "   volume floor: ${vol}% -> 50% on $d"
+    fi
+
+    # 3. dummy sink par fase streams ko default sink par wapas lao
+    pa pactl list short sink-inputs 2>/dev/null | awk '{print $1}' | while read -r sid; do
+        [ -n "$sid" ] || continue
+        if [ "$(stream_sink "$sid")" = "auto_null" ]; then
+            pa pactl move-sink-input "$sid" "$d" 2>/dev/null && \
+                echo "   stream $sid: auto_null -> $d" || true
+        fi
+    done
+    return 0
 }
 
 # Default sink repair — boot par WirePlumber fallback-sink race se default
@@ -78,9 +137,10 @@ repair_default() {
         return 1
     fi
 
-    # default theek hai to kuch nahi karna
+    # default theek hai to sirf ensure (unmute + volume + stream move)
     if ! default_sink_bad; then
         echo "   default sink OK: $(default_sink_name)"
+        ensure_output
         return 0
     fi
 
@@ -118,10 +178,11 @@ usage() {
     cat <<EOF
 devos-audio $VERSION — DevOS audio diagnostics
 
-  status    short: cards, sinks, volume, mute
+  status    short: cards, sinks, volume, mute, streams
   diagnose  full report (also written to /tmp/devos-audio-report.txt)
   test      play a short test tone on the default output
-  repair    only fix the default sink (dummy/dead -> real), no restart
+  verify    end-to-end proof: tone -> real sink capture -> PASS/FAIL
+  repair    fix default sink + unmute + volume floor + stray stream move
   fix       safe repairs: group, unmute, stack restart, default sink repair
   version   print version
   help      this text
@@ -168,10 +229,24 @@ do_status() {
     fi
     if have pactl && pa pactl info >/dev/null 2>&1; then
         pa pactl info 2>/dev/null | grep -E 'Server Name|Default Sink' | sed 's/^/  /'
+        echo "streams (sink-inputs):"
+        pa pactl list short sink-inputs 2>/dev/null | while read -r sid _rest; do
+            echo "  #$sid -> ${stream_sink "$sid":-?}"
+        done
+        [ -z "$(pa pactl list short sink-inputs 2>/dev/null)" ] && echo "  (none)"
         if default_sink_bad; then
             echo "  !! WARNING: default sink is dummy/dead ('$(default_sink_name)')"
             echo "     -> audio will NOT reach the speakers."
-            echo "     Fix: devos-audio fix"
+            echo "     Fix: devos-audio repair"
+        fi
+        if [ "$(dummy_streams)" -gt 0 ]; then
+            echo "  !! WARNING: $(dummy_streams) stream(s) stuck on Dummy Output (auto_null)"
+            echo "     Fix: devos-audio repair"
+        fi
+        vol="$(default_volume_pct)"
+        if [ -n "$vol" ] && [ "$vol" -lt 10 ] 2>/dev/null; then
+            echo "  !! WARNING: default sink volume ${vol}% (practically silent)"
+            echo "     Fix: devos-audio repair"
         fi
     fi
     if have amixer; then
@@ -242,6 +317,9 @@ do_diagnose() {
             pa pactl info 2>&1 | sed 's/^/  /'
             echo "--- pactl sinks ---"
             pa pactl list short sinks 2>&1 | sed 's/^/  /'
+            echo "--- pactl sink-inputs (streams) ---"
+            pa pactl list short sink-inputs 2>&1 | sed 's/^/  /'
+            pa pactl list sink-inputs 2>/dev/null | grep -E '^[[:space:]]*(Input #|Sink:|Mute:)' | sed 's/^/  /'
         fi
         echo
         echo "--- default sink check ---"
@@ -249,11 +327,22 @@ do_diagnose() {
             d="$(default_sink_name)"
             echo "default sink: ${d:-none}"
             echo "all sinks:    $(all_sink_names | tr '\n' ' ')"
+            echo "volume:       $(default_volume_pct)%"
             if default_sink_bad; then
                 echo "PROBLEM: default sink is dummy/dead -> NO SOUND."
-                echo "Fix: devos-audio fix   (auto-repairs: dummy -> real sink + streams moved)"
+                echo "Fix: devos-audio repair   (auto-repairs: dummy -> real sink + streams moved)"
             else
                 echo "default sink OK"
+            fi
+            n="$(dummy_streams)"
+            if [ "$n" -gt 0 ]; then
+                echo "PROBLEM: $n stream(s) on Dummy Output -> those apps are SILENT."
+                echo "Fix: devos-audio repair   (moves stray streams to the real sink)"
+            fi
+            vol="$(default_volume_pct)"
+            if [ -n "$vol" ] && [ "$vol" -lt 10 ] 2>/dev/null; then
+                echo "PROBLEM: default sink volume ${vol}% — inaudible."
+                echo "Fix: devos-audio repair   (volume floor -> 50%)"
             fi
         else
             echo "(pactl/server unavailable)"
@@ -292,6 +381,67 @@ do_test() {
     fi
 }
 
+# do_verify — real hardware par ek hi command se PASS/FAIL.
+# Kya karta hai: default sink check -> repair (agar zaroori) -> 3s tone play
+# -> default sink ke MONITOR se capture -> amplitude check.
+# Agar monitor me sine gaya = PipeWire se ALSA device tak sound pahunch chuki
+# (speaker amp/jack alag musibat ho sakti hai — uska alag signal).
+do_verify() {
+    local d amp vol fail=0 raw
+    say "devos-audio $VERSION — end-to-end audio verify"
+
+    if ! have pactl || ! pa pactl info >/dev/null 2>&1; then
+        echo "FAIL: pipewire-pulse not running (no user session?)"
+        exit 1
+    fi
+
+    # 1. default sink + repair
+    if default_sink_bad; then
+        echo "default sink is dummy/dead — repairing"
+        repair_default 20 || true
+    fi
+    d="$(default_sink_name)"
+    if default_sink_bad || [ -z "$d" ]; then
+        echo "FAIL: default sink still dummy/dead ('${d:-none}')"
+        fail=1
+    else
+        echo "OK:   default sink = $d"
+    fi
+
+    # 2. unmute + volume floor + stray streams
+    ensure_output
+    vol="$(default_volume_pct)"
+    echo "OK:   volume = ${vol:-?}%, mute = $(pa pactl get-sink-mute "$d" 2>/dev/null | sed 's/.*: //')"
+
+    # 3. tone play + monitor capture (same trick se ki VM test 32/32 hua)
+    raw="$(mktemp /tmp/devos-verify-XXXXXX.raw)"
+    if ! have parec || ! have speaker-test; then
+        echo "FAIL: parec/speaker-test missing (install pulseaudio-utils alsa-utils)"
+        rm -f "$raw"
+        exit 1
+    fi
+    ( pa timeout 6 speaker-test -t sine -c 2 -f 440 -l 1 >/dev/null 2>&1 ) &
+    sleep 1
+    pa timeout 4 parec -d "$d.monitor" --format=s16le --rate=48000 --channels=2 \
+        "$raw" 2>/dev/null
+    wait 2>/dev/null
+    amp="$(od -An -v -td2 "$raw" 2>/dev/null | tr -s ' ' '\n' | grep -v '^$' \
+           | awk '{a=($1<0)?-$1:$1; if(a>m)m=a} END{print (m+0)}')"
+    rm -f "$raw"
+
+    if [ -n "$amp" ] && [ "$amp" -gt 500 ] 2>/dev/null; then
+        echo "OK:   sink monitor captured test tone (max|sample|=$amp)"
+        echo
+        echo "PASS: audio path works end to end (default sink + volume + tone)."
+        echo "      Agar phir bhi speaker se awaaz nahi — speaker amp/jack ya"
+        echo "      app ka apna mute check karo, phir: devos-audio diagnose"
+        exit 0
+    fi
+    echo "FAIL: no tone reached the real sink (max|sample|=${amp:-0})"
+    echo "      -> run: devos-audio diagnose   (report bhejo)"
+    exit 1
+}
+
 do_fix() {
     root_or_sudo
     say "1/5 checking audio group membership"
@@ -321,7 +471,7 @@ do_fix() {
         pa systemctl --user is-active pipewire.service wireplumber.service pipewire-pulse.service 2>/dev/null | sed 's/^/   /' || true
     fi
 
-    say "4/5 repairing the default sink (dummy/dead -> real)"
+    say "4/5 repairing the default sink (dummy/dead -> real + ensure output)"
     repair_default 30
 
     say "5/5 unmuting the PipeWire default sink"
@@ -330,14 +480,15 @@ do_fix() {
         pa wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.5 2>&1 | sed 's/^/   /' || true
         echo "   default sink: $(default_sink || echo 'unknown')"
     fi
-    say "done — run: devos-audio test"
+    say "done — run: devos-audio verify"
 }
 
 case "${1:-status}" in
     status)   do_status ;;
     diagnose) do_diagnose ;;
     test)     do_test "${2:-3}" ;;
-    repair)   say "repairing default sink (no stack restart)"; repair_default 30 ;;
+    verify)   do_verify ;;
+    repair)   say "repairing default sink + output ensure (no stack restart)"; repair_default 30 ;;
     fix)      do_fix ;;
     version|--version|-v) echo "devos-audio $VERSION" ;;
     help|--help|-h) usage ;;
