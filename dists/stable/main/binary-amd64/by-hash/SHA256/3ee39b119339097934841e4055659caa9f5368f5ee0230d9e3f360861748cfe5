@@ -1,5 +1,5 @@
 Package: devos-audio
-Version: 1.0.3
+Version: 1.0.4
 Architecture: all
 Maintainer: DevOS <security@devos.local>
 Section: sound
@@ -9,13 +9,15 @@ Recommends: pavucontrol
 Description: Audio diagnostics and repair for DevOS
  devos-audio reports the sound cards, kernel modules, firmware, PipeWire
  nodes and mixer state, plays a test tone and applies safe repairs
- (audio group, unmute, audio stack restart). Includes a "DevOS Audio"
- launcher for the app grid.
-Filename: pool/main/d/devos-audio/devos-audio_1.0.3_all.deb
-Size: 4354
-MD5sum: c70a743c87fef943d800b47cfa0c4039
-SHA1: fbefcfbdf74ca622eaf844149dc30c7c66cd8dac
-SHA256: aa14ccefaccad9450e6e9402efe5d127e4d664d508cdd7d3cee29611e2ee2db7
+ (audio group, unmute, audio stack restart, default sink repair from
+ dummy/dead to the real sink). Includes a session guard unit that keeps
+ the default sink pointed at real hardware, and a "DevOS Audio" launcher
+ for the app grid.
+Filename: pool/main/d/devos-audio/devos-audio_1.0.4_all.deb
+Size: 6632
+MD5sum: 675c1d38ca3d901579e52969ee6bef62
+SHA1: 0b4b480ba0ebfabdd849b6a688c20956953270cf
+SHA256: 5e653c9b402d9e161c99d14201748a1d7e1c364157550a08aa12b9f9fcd4973c
 
 Package: devos-keyring
 Version: 1.0.0
@@ -30,9 +32,9 @@ Description: DevOS package archive signing key and APT source
  InRelease file over HTTPS.
 Filename: pool/main/d/devos-keyring/devos-keyring_1.0.0_all.deb
 Size: 1192
-MD5sum: ea3047524464ee7c4d12eef317602f09
-SHA1: 79464b8fb6674002a8bc484bcedd9db4b5d389f3
-SHA256: 50f45376c42ad68f12dff58bf8724483e8617cede7ed21da0d572715215f7d41
+MD5sum: c21b6ad36ddde372de5551d7dabfc4de
+SHA1: df572e86760563204196ab6f0494883f298d5b20
+SHA256: 6650c16ba548420c9c466169b429438aaacf5b12257b65fd30aa9ad1e4698323
 
 Package: devos-update
 Version: 1.0.5
@@ -48,6 +50,6 @@ Description: Safe update manager for DevOS
  security upgrades.
 Filename: pool/main/d/devos-update/devos-update_1.0.5_all.deb
 Size: 4232
-MD5sum: 0d65c5bcc07fcd04c4639f00f1aa07a2
-SHA1: 2c8f692e7de1ed48e98309fc8342f0a788ca481b
-SHA256: a44fca134fe893d0efb26b1eaa046e39c8454bf27a0afdc420730013a04db303
+MD5sum: 39e8f7df50efe6f19d67fd5258096a9c
+SHA1: fa7bd0f6049635f1da8d4fd5b80fa96b66f9fc6b
+SHA256: 20024d212a5382d418ae1943995eb2312ed995094fe828f736698c7d6a67216b
