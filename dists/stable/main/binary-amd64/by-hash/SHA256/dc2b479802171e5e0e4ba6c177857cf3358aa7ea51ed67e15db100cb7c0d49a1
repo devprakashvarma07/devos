@@ -1,5 +1,5 @@
 Package: devos-audio
-Version: 1.0.5
+Version: 1.0.6
 Architecture: all
 Maintainer: DevOS <security@devos.local>
 Section: sound
@@ -14,11 +14,13 @@ Description: Audio diagnostics and repair for DevOS
  an end-to-end "verify" command (tone -> real sink capture -> PASS/FAIL),
  a session guard unit that keeps the output ready at login and on every
  audio-stack restart, and a "DevOS Audio" launcher for the app grid.
-Filename: pool/main/d/devos-audio/devos-audio_1.0.5_all.deb
-Size: 8580
-MD5sum: a16107ce9e5c7206aef0467f52f78e2d
-SHA1: b8e4a8b686f3795b88e13a771098edc5b50cac75
-SHA256: 7e8577cf8b4927dd7a892dbed0a9d6f6498e21d249dc52d13605480a9fb2a6e5
+ 1.0.6: parsing fix in status/guard move loop — verbose sink-inputs
+ "Input #N" lines have no $3 field (id is $2 minus '#').
+Filename: pool/main/d/devos-audio/devos-audio_1.0.6_all.deb
+Size: 8884
+MD5sum: e83ca0727310c7474fba580e1534dfd1
+SHA1: 841215fb92b4347cdbc1802c6a3230570d834bd9
+SHA256: 0802137f4353994eb4dd819778a735ad809a9c65e6705561c97e3ba97de09a95
 
 Package: devos-keyring
 Version: 1.0.0
@@ -33,9 +35,9 @@ Description: DevOS package archive signing key and APT source
  InRelease file over HTTPS.
 Filename: pool/main/d/devos-keyring/devos-keyring_1.0.0_all.deb
 Size: 1192
-MD5sum: ad1d481fd9048936f092efa3818c0627
-SHA1: 827d3f096bac5966c19fa714bee14bc0f9d61696
-SHA256: bff028b490caa43c1d4acfab36b4b3daf37ed333886ffc47df61107c49c37d24
+MD5sum: 586150255e3a2fad45b1e9764421cb59
+SHA1: 4d4325582e5973d21ea11040468311a884ffd701
+SHA256: 40c95da1ad5dc94511ba79b2db34bc58b4e7bfefe9b23216f29ce85d744819eb
 
 Package: devos-update
 Version: 1.0.5
@@ -51,6 +53,6 @@ Description: Safe update manager for DevOS
  security upgrades.
 Filename: pool/main/d/devos-update/devos-update_1.0.5_all.deb
 Size: 4232
-MD5sum: 40a4e2b0925162b3114327d306cfa340
-SHA1: bf362a84ed5172a3cb51a4e658d202155f9e572e
-SHA256: 34f9ffa5361833ff0ac39dab0ecef09c8dbb828fdfb793d69bc31f2dd18ee498
+MD5sum: 2aa0fb1bf2fd331ddb2986b0c3bda3a9
+SHA1: b07890eb79249f21372d99a5ab39c51f67e911f8
+SHA256: 9899d99939396f80cd028361147fe2a3d37124f8c249453634b2eb2607c26444
