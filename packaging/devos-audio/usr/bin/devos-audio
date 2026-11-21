@@ -67,26 +67,39 @@ default_sink() {
     fi
 }
 
-# ---- stream helpers: kis stream kis sink par hai ----
+# ---- stream helpers — PipeWire 1.4.2 verbose format ----
+# verbose "Sink Input #83" -> $3="#83" (stream id = 83); sink line "    Sink: 55"
+# -> $2="55" = SINK INDEX. short list: $1=sink index, $2=name.
+# (so stuck detection = stream Sink: index == auto_null's INDEX from short list;
+#  move-sink-input by NAME fails on PW 1.4.2: "No such entity" — use indices.)
 
-# kis stream kis sink par hai (robust — verbose list me "Input #N"
-# -> fields $1="Input", $2="#N"; id $1 se anya gate rakhna chahiye)
-stream_sink() { # stream-index -> sink name
-    [ -n "${1:-}" ] || return 0
-    pa pactl list sink-inputs 2>/dev/null | awk -v id="$1" '
-        /^Input #/ {cur=$2; cur=substr(cur,2); show=(cur==id); next}
-        show && /^[[:space:]]*Sink:/ {print $2; exit}
+# short-list ke $2=name, $1=index se sink INDEX nikalo
+sink_index_of() { # sink name -> index
+    have pactl || return 0
+    pa pactl list short sinks 2>/dev/null | awk -v n="$1" '$2==n{print $1; exit}'
+}
+
+# auto_null (dummy) ka sink INDEX (short list ke $1)
+dummy_index() {
+    have pactl || { echo ""; return 0; }
+    pa pactl list short sinks 2>/dev/null | awk '$2=="auto_null"{print $1; exit}'
+}
+
+# auto_null par stuck streams — ids (Sink Input lines), sinks ke alag format
+stuck_stream_ids() {
+    have pactl || { echo ""; return 0; }
+    local di; di="$(dummy_index)"
+    [ -n "$di" ] || return 0
+    pa pactl list sink-inputs 2>/dev/null | awk -v di="$di" '
+        /^Sink Input #/ { sid=substr($3,2); next }
+        /^Input #/      { sid=substr($2,2);  next }
+        /^[[:space:]]*Sink:/ { if ($2==di && sid!="") print sid; sid=""; next }
     '
 }
 
-# auto_null (dummy) par fase streams ki sankhya
+# auto_null par stuck streams ki sankhya
 dummy_streams() {
-    have pactl || { echo 0; return 0; }
-    pa pactl list short sink-inputs 2>/dev/null \
-        | awk '{print $1}' | while read -r sid; do
-            [ -n "$sid" ] || continue
-            [ "$(stream_sink "$sid")" = "auto_null" ] && echo x
-        done | wc -l
+    stuck_stream_ids | wc -l
 }
 
 # default sink par guaranteed output: unmute + volume floor + dummy streams move.
@@ -108,13 +121,15 @@ ensure_output() {
         echo "   volume floor: ${vol}% -> 50% on $d"
     fi
 
-    # 3. dummy sink par fase streams ko default sink par wapas lao
-    pa pactl list short sink-inputs 2>/dev/null | awk '{print $1}' | while read -r sid; do
+    # 3. auto_null par stuck streams ko default sink par wapas lao
+    #    (move target = default sink INDEX; name-based move fails: "No such entity")
+    local d_idx
+    d_idx="$(sink_index_of "$d")"
+    [ -z "$d_idx" ] && d_idx="$d"
+    stuck_stream_ids | while read -r sid; do
         [ -n "$sid" ] || continue
-        if [ "$(stream_sink "$sid")" = "auto_null" ]; then
-            pa pactl move-sink-input "$sid" "$d" 2>/dev/null && \
-                echo "   stream $sid: auto_null -> $d" || true
-        fi
+        pa pactl move-sink-input "$sid" "$d_idx" 2>/dev/null && \
+            echo "   stream $sid: auto_null -> $d" || true
     done
     return 0
 }
@@ -162,8 +177,12 @@ repair_default() {
     echo "   default was '${d:-none}' (dummy/dead) -> switching to '$real'"
     if pa pactl set-default-sink "$real" 2>/dev/null; then
         # active streams ko naye sink par move karo (awaaz wapas aa jaye)
+        # (move target = real sink INDEX — move by name fails: "No such entity")
+        local real_idx
+        real_idx="$(sink_index_of "$real")"
+        [ -z "$real_idx" ] && real_idx="$real"
         pa pactl list short sink-inputs 2>/dev/null | awk '{print $1}' | while read -r sid; do
-            [ -n "$sid" ] && pa pactl move-sink-input "$sid" "$real" 2>/dev/null || true
+            [ -n "$sid" ] && pa pactl move-sink-input "$sid" "$real_idx" 2>/dev/null || true
         done
         pa pactl set-sink-mute "$real" 0 2>/dev/null || true
         logger -t devos-audio "default sink repaired: ${d:-none} -> $real" 2>/dev/null || true
@@ -231,7 +250,11 @@ do_status() {
         pa pactl info 2>/dev/null | grep -E 'Server Name|Default Sink' | sed 's/^/  /'
         echo "streams (sink-inputs):"
         pa pactl list short sink-inputs 2>/dev/null | while read -r sid _rest; do
-            echo "  #$sid -> ${stream_sink "$sid":-?}"
+            t="$(pa pactl list sink-inputs 2>/dev/null | awk -v id="$sid" '
+                /^Sink Input #/ { sid=$3; sub(/^#/, "", sid); next }
+                /^Input #/      { sid=$2;  sub(/^#/, "", sid); next }
+                sid==id && /^[[:space:]]*Sink:/ { print $2; exit }')"
+            echo "  #$sid -> ${t:-?}"
         done
         [ -z "$(pa pactl list short sink-inputs 2>/dev/null)" ] && echo "  (none)"
         if default_sink_bad; then

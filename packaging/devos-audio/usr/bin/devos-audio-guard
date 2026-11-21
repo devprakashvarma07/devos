@@ -56,27 +56,26 @@ if [ -n "$default" ] && [ "$default" != "auto_null" ] && \
     if [ -n "$vol" ] && [ "$vol" -lt 10 ] 2>/dev/null; then
         pactl set-sink-volume "$default" 50% 2>/dev/null && actions="$actions, vol ${vol}%->50%"
     fi
-    # dummy sink par fase streams wapas default par
-    # (pehle gin lo — move ke baad count karoge to hamesha 0 aayega)
-    # verbose list me "Input #N" -> awk fields $1="Input", $2="#N" (no $3!) —
-    # isliye substr($2,2) se id lo, $3 se nahi (1.0.6 bug fix; suite me
-    # "stream stuck on dummy" ya STUCK=0 checks same tarah align kare hain).
-    stream_sink() { # index -> sink name
-        [ -n "${1:-}" ] || return 0
-        pactl list sink-inputs 2>/dev/null | awk -v id="$1" '
-            /^Input #/ {cur=$2; cur=substr(cur,2); show=(cur==id); next}
-            show && /^[[:space:]]*Sink:/ {print $2; exit}
+    # dummy sink par stuck streams wapas default par — 1.0.6 format note:
+    # verbose list me "Sink Input #83" ($1=Sink $2=Input $3=#83); sink line
+    # "    Sink: 55" = sink INDEX. stuck = sink line == auto_null's INDEX
+    # (short list ka $1). move target = default sink INDEX (by NAME fails:
+    # "No such entity" on PW 1.4.2 — dbg-verified). ndummy pehle gin lo —
+    # move ke baad 0 ho jata hai.
+    stuck_ids() {
+        local di; di="$(pactl list short sinks 2>/dev/null | awk '$2=="auto_null"{print $1; exit}')"
+        [ -z "$di" ] && return 0
+        pactl list sink-inputs 2>/dev/null | awk -v di="$di" '
+            /^Sink Input #/ { sid=substr($3,2); next }
+            /^Input #/      { sid=substr($2,2);  next }
+            /^[[:space:]]*Sink:/ { if ($2==di && sid!="") print sid; sid=""; next }
         '
     }
-    ndummy="$(pactl list short sink-inputs 2>/dev/null \
-              | awk '{print $1}' | while read -r sid; do
-                    [ -n "$sid" ] || continue
-                    [ "$(stream_sink "$sid")" = "auto_null" ] && echo x
-                done | wc -l)"
-    pactl list short sink-inputs 2>/dev/null | awk '{print $1}' | while read -r sid; do
+    ndummy="$(stuck_ids | wc -l)"
+    d_idx="$(pactl list short sinks 2>/dev/null | awk -v n="$default" '$2==n{print $1; exit}')"
+    stuck_ids | while read -r sid; do
         [ -n "$sid" ] || continue
-        [ "$(stream_sink "$sid")" = "auto_null" ] && \
-            pactl move-sink-input "$sid" "$default" 2>/dev/null
+        [ -n "$d_idx" ] && pactl move-sink-input "$sid" "$d_idx" 2>/dev/null
     done
     [ "${ndummy:-0}" -gt 0 ] && actions="$actions, moved $ndummy stream(s) off dummy"
     if [ -n "$actions" ]; then
@@ -89,8 +88,10 @@ fi
 
 # 4. repair: dummy/dead default -> asli sink + active streams move
 if pactl set-default-sink "$real" 2>/dev/null; then
+    real_idx="$(pactl list short sinks 2>/dev/null | awk -v n="$real" '$2==n{print $1; exit}')"
+    [ -z "$real_idx" ] && real_idx="$real"
     pactl list short sink-inputs 2>/dev/null | awk '{print $1}' | while read -r sid; do
-        [ -n "$sid" ] && pactl move-sink-input "$sid" "$real" 2>/dev/null || true
+        [ -n "$sid" ] && pactl move-sink-input "$sid" "$real_idx" 2>/dev/null || true
     done
     pactl set-sink-mute "$real" 0 2>/dev/null || true
     logger -t devos-audio "default sink repaired: ${default:-none} -> $real" 2>/dev/null || true

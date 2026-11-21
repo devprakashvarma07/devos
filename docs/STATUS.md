@@ -8,7 +8,7 @@
 |---|---|
 | File (latest) | `devos-1.0-amd64-r12.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
 | Size | 1.66 GiB (1,667,891,200 B) |
-| sha256 (r12) | `8c9bd5d77e188b6dee6caca0c593658672ef63f6e768ce341ba6487a47906175` |
+| sha256 (r12) | `e3d315d205ea6b479b80273def078402a7fd0795bd99dcde28af871e22f40ca3` |
 | r12 changes | `devos-audio` **1.0.5 + 1.0.6**: 1.0.5 — new `verify` (tone → real-sink `.monitor` capture → PASS/FAIL), new `ensure_output()` (unmute + volume floor <10%→50% + move streams stuck on `auto_null` to the default — now also runs on the "default sink OK" path), guard 1.0.5 same ensure on every restart; 1.0.6 — parsing fix (verbose `pactl list sink-inputs` "Input #N" lines have no `$3` — id is `$2` minus `#`; status/guard/main loops fixed); **Brave 157.1.99.57 preloaded** (cloned from this laptop's `/opt/brave.com/brave`), Brave = default browser (NetSurf kept); new `scripts/desktop/install-brave.sh`; zstd-compressed squashfs contains all of the above |
 | r11 | `devos-1.0-amd64-r11.iso` (1,469,054,976 B, sha256 `a3d1479f1d403854fecc61e34d865a01557441302c25a2795fe5b739d03d94c4`) — `devos-audio` **1.0.4**: default-sink repair (dummy/dead `auto_null` → real hardware + active streams moved + unmuted), new `repair` subcommand, `pa()` user-bus wrapper so `sudo devos-audio fix` works, WARNING/PROBLEM in `status`/`diagnose`/`test`, and a session guard that re-repairs the default sink at login and on every audio-stack restart; 32/32 audio suite on KVM |
 | r10 (previous) | `24bf761e5b305ca4bdcabdca7bad8fe7af045c2549d8d8f48b9a97fa943e0997` — `devos-session` + `devos-compositor` string-view hardening (explicit-length suffix views retargeted, log/identity lengths corrected — full audit of all 11 rebranded binaries: 0 broken views); `/etc/skel` first-boot defaults baked from live user settings (dock icon size 34 + glass, tap-to-click, dark theme) |
@@ -102,7 +102,7 @@ file + DNS timeouts), so cloning is the verified-reliable path.
 
 | Item | Value |
 |---|---|
-| ISO r12 | `devos-1.0-amd64-r12.iso` — 1,667,891,200 B, sha256 `8c9bd5d77e188b6dee6caca0c593658672ef63f6e768ce341ba6487a47906175` |
+| ISO r12 | `devos-1.0-amd64-r12.iso` — 1,667,891,200 B, sha256 `e3d315d205ea6b479b80273def078402a7fd0795bd99dcde28af871e22f40ca3` |
 | VM suite | 40/40 on KVM/QEMU (27 audio incl. `devos-audio verify` = PASS, 13 Brave/QEMU: binary + entry points + desktop + icons + default + `ldd` + headless launch) — transcript: `/tmp/opencode/r12-test-run.log` |
 | Artifacts | `artifacts/devos-1.0/devos-1.0-amd64-r12.iso` + `.sha256` — latest confirmed (also `/mnt/devos/out/devos-1.0-amd64.iso`) |
 | Approval gate | Release ISO upload = ON HOLD until user says (`release-iso.sh` retry loop exists; do not run) |
