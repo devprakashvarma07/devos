@@ -6,28 +6,28 @@ Label: DevOS
 Suite: stable
 Codename: stable
 Version: 1.0
-Date: Sat, 21 Nov 2026 16:27:31 +0000
-Valid-Until: Mon, 21 Dec 2026 16:27:31 +0000
+Date: Sat, 21 Nov 2026 17:09:36 +0000
+Valid-Until: Mon, 21 Dec 2026 17:09:36 +0000
 Architectures: amd64
 Components: main
 Description: DevOS package archive
 Acquire-By-Hash: yes
 MD5Sum:
- 27d59c7b1f53cddf040a7508a30592c7 2462 main/binary-amd64/Packages
- f752b5c8e72dc72f0e25ef2242f75d9b 1277 main/binary-amd64/Packages.gz
- 172ea897e632ed63dc471db6229e55c3 1328 main/binary-amd64/Packages.xz
+ db71c35c38de20d5c06cbb39898a791d 2462 main/binary-amd64/Packages
+ ec8d4297c7d2f1d49880a2fa8eec3693 1275 main/binary-amd64/Packages.gz
+ b2abd5b79ce4b136cff3b6ea1d44b2c1 1332 main/binary-amd64/Packages.xz
 SHA1:
- ada559d09f1553e9a65d544217fb43a04e2e4243 2462 main/binary-amd64/Packages
- 73913cb346cdba0b8b98a3ad85c4e8ed3b4437b3 1277 main/binary-amd64/Packages.gz
- 473a9c259320e0e75b82403fbb0607eaf6ad7b07 1328 main/binary-amd64/Packages.xz
+ 78f701c5762881511fafdec5a542d1c1a1f7e071 2462 main/binary-amd64/Packages
+ 3efb1ad15d2558f8f4f5f87a7625fca9ec4995fb 1275 main/binary-amd64/Packages.gz
+ 45572306ee71fd7d276b47fd5cb27f2e56dce2c1 1332 main/binary-amd64/Packages.xz
 SHA256:
- dc2b479802171e5e0e4ba6c177857cf3358aa7ea51ed67e15db100cb7c0d49a1 2462 main/binary-amd64/Packages
- d0ce916444f751c7271063125858001c44c1d0eab21c0859c3f53fc2a83ad195 1277 main/binary-amd64/Packages.gz
- cc7e0c7a3e32a255fdfd942f8ba9c08a7eb66e0b64f72d7fd7b56cca95f77dae 1328 main/binary-amd64/Packages.xz
+ 7bc378a09e2768784155ef73f7b7843955288a0cc992bf0504e784ec7ac3b5cd 2462 main/binary-amd64/Packages
+ 0bdc4b2ec6d4e58fd981a099de992f5433323c5e10e6edf7bdbf31554647bc96 1275 main/binary-amd64/Packages.gz
+ 9051b3e56f7f57dfb6931936f7569379ac4d444eaf4e72b7e33bcd6c834c9478 1332 main/binary-amd64/Packages.xz
 -----BEGIN PGP SIGNATURE-----
 
-iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCawHGcwAKCRCrAe3eAP7C
-S7AzAP0dkJX/T+mw1WZiGoG0QLfVCd49EqcZLPWNTpqixfv/HAD/a5YtPE26bXj7
-As4Q08onpfVCnnVfneA6/JELeXUORgY=
-=/dJm
+iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCawHQUAAKCRCrAe3eAP7C
+SzH7AQDw8/I3yI1q+QUVAWL9xFDaXVP0np990MmfqcrxS9jAigEA0uLWEpWGJXCN
+modTLvZkTZrtbzPr3PAj1W0wDJeE2A0=
+=k7NS
 -----END PGP SIGNATURE-----
