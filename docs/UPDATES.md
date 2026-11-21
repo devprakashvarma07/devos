@@ -81,7 +81,7 @@ curl -fsS https://devprakashvarma07.github.io/devos/dists/stable/InRelease | hea
 
 # 5. ISO (optional): attach to a GitHub release, never to git
 #    (existing tag par asset --clobber se upload hota hai, SHA256SUMS merge hota hai)
-./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r10.iso
+./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r11.iso
 ```
 
 ## Existing installations

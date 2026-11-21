@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# devos-audio-guard — session start par default sink ka watchdog
+# Hinglish: boot par WirePlumber ki fallback-sink race se default sink
+# auto_null (Dummy Output) ban jata hai (boot0 forensics: real sink 27s
+# late aaya, default dummy par atak gaya) — yeh guard session start par
+# aur audio stack restart par default ko wapas asli sink par laata hai.
+set -uo pipefail
+
+T=devos-audio
+log() { logger -t "$T" -- "guard: $*" 2>/dev/null || true; echo "guard: $*"; }
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+have pactl || { log "pactl missing — skip"; exit 0; }
+
+# 1. pipewire-pulse server ka wait (max 45s)
+w=0
+while ! pactl info >/dev/null 2>&1 && [ "$w" -lt 45 ]; do
+    sleep 1; w=$((w + 1))
+done
+if ! pactl info >/dev/null 2>&1; then
+    log "pipewire-pulse not running after ${w}s — skip"
+    exit 0
+fi
+
+# 2. asli sink ka wait — boot0 me 27s late aaya tha, 45s tak ruko
+real=""
+w=0
+while [ "$w" -lt 45 ]; do
+    real="$(pactl list short sinks 2>/dev/null | awk '{print $2}' | grep -v '^auto_null$' | head -1)"
+    [ -n "$real" ] && break
+    sleep 1; w=$((w + 1))
+done
+
+default="$(pactl info 2>/dev/null | sed -n 's/^Default Sink: //p')"
+
+if [ -z "$real" ]; then
+    # koi asli sink hi nahi — hardware detect nahi hua (alag baat hai)
+    log "no real sink after ${w}s (default='${default:-none}')"
+    exit 0
+fi
+
+# 3. default pehle se sahi hai to chhod do
+if [ -n "$default" ] && [ "$default" != "auto_null" ] && \
+   pactl list short sinks 2>/dev/null | awk '{print $2}' | grep -qx "$default"; then
+    log "default sink ok: $default"
+    exit 0
+fi
+
+# 4. repair: dummy/dead default -> asli sink + active streams move
+if pactl set-default-sink "$real" 2>/dev/null; then
+    pactl list short sink-inputs 2>/dev/null | awk '{print $1}' | while read -r sid; do
+        [ -n "$sid" ] && pactl move-sink-input "$sid" "$real" 2>/dev/null || true
+    done
+    pactl set-sink-mute "$real" 0 2>/dev/null || true
+    log "repaired: '${default:-none}' -> $real"
+else
+    log "set-default-sink $real failed"
+fi
+exit 0

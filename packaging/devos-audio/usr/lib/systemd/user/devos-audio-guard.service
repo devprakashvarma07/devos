@@ -1,0 +1,15 @@
+[Unit]
+Description=DevOS audio default-sink guard (dummy/dead default -> real sink)
+# boot par WirePlumber fallback-sink race covered; audio stack restart par
+# bhi guard dobara chale (PartOf) — dummy default kabhi atka nahi rahega.
+After=pipewire-pulse.service wireplumber.service
+Wants=pipewire-pulse.service
+PartOf=pipewire-pulse.service wireplumber.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/devos-audio-guard
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target

@@ -6,14 +6,15 @@
 
 | Item | Value |
 |---|---|
-| File (latest) | `devos-1.0-amd64-r10.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| File (latest) | `devos-1.0-amd64-r11.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
 | Size | 1.4 GiB (1,469,054,976 B) |
-| sha256 (r10) | `24bf761e5b305ca4bdcabdca7bad8fe7af045c2549d8d8f48b9a97fa943e0997` |
-| r10 changes | `devos-session` + `devos-compositor` string-view hardening (explicit-length suffix views retargeted, log/identity lengths corrected — full audit of all 11 rebranded binaries: 0 broken views); `/etc/skel` first-boot defaults baked from live user settings (dock icon size 34 + glass, tap-to-click, dark theme) |
-| r9 (previous) | `39ba5afd983a22d58049d1702e8edc252cac02391281b4be4936b44d44c940a3` — `devos-audio` 1.0.3 + `alsa-utils`/`pavucontrol`/`powermgmt-base`, `devos-update` 1.0.5, timezone pinned to `Asia/Kolkata` on the live cmdline (`patch-boot-config.sh`), `LANG=en_US.UTF-8`, `NetworkManager-wait-online` + `ModemManager` disabled, journald capped at 200 MB |
+| sha256 (r11) | `a3d1479f1d403854fecc61e34d865a01557441302c25a2795fe5b739d03d94c4` |
+| r11 changes | `devos-audio` **1.0.4**: default-sink repair (dummy/dead `auto_null` → real hardware + active streams moved + unmuted), new `repair` subcommand, `pa()` user-bus wrapper so `sudo devos-audio fix` works, WARNING/PROBLEM in `status`/`diagnose`/`test`, and a session guard (`devos-audio-guard.service`, enabled) that re-repairs the default sink at login and on every audio-stack restart |
+| r10 (previous) | `24bf761e5b305ca4bdcabdca7bad8fe7af045c2549d8d8f48b9a97fa943e0997` — `devos-session` + `devos-compositor` string-view hardening (explicit-length suffix views retargeted, log/identity lengths corrected — full audit of all 11 rebranded binaries: 0 broken views); `/etc/skel` first-boot defaults baked from live user settings (dock icon size 34 + glass, tap-to-click, dark theme) |
+| r9 | `39ba5afd983a22d58049d1702e8edc252cac02391281b4be4936b44d44c940a3` — `devos-audio` 1.0.3 + `alsa-utils`/`pavucontrol`/`powermgmt-base`, `devos-update` 1.0.5, timezone pinned to `Asia/Kolkata` on the live cmdline (`patch-boot-config.sh`), `LANG=en_US.UTF-8`, `NetworkManager-wait-online` + `ModemManager` disabled, journald capped at 200 MB |
 | r8 | `c1face4aa271a68c11f573a6734ecd94ca19c4f7b4e3f6b83b4aad4d741895a0` |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos`, autologin |
-| Live verified | **r10 live boot (KVM)**: full checklist — clock IST, skel defaults active (dock 34/glass, dark theme), journal 0 "Cannot persist", session input config auto-created with tap-to-click, session + compositor procs on socket `devos-0`, GUI app env `XDG_CURRENT_DESKTOP=DevOS` / `WAYLAND_DISPLAY=devos-0`, `devos-audio diagnose` ran, installer + desktop render (screendump); r9: desktop + installer render, top-bar clock correct (IST), audio path end to end; r8: desktop + dock + installer language step |
+| Live verified | **r11 live boot (KVM)**: 32/32 audio suite — guard active/enabled and ran at session start, default sink real at boot, `fix` 5-step e2e, forced-dummy → `repair`/`guard` switch back to real, `PartOf` (wireplumber restart → guard re-repairs), WARNING/PROBLEM branches, end-to-end sound (`devos-audio test` → wav 1,425,408 B, max\|sample\|=26226 = non-silent 40% sine), 0 "Cannot persist", dock 34; **r10**: full checklist — clock IST, skel defaults active (dock 34/glass, dark theme), journal 0 "Cannot persist", session input config auto-created with tap-to-click, session + compositor procs on socket `devos-0`, GUI app env `XDG_CURRENT_DESKTOP=DevOS` / `WAYLAND_DISPLAY=devos-0`, `devos-audio diagnose` ran, installer + desktop render (screendump); r9: desktop + installer render, top-bar clock correct (IST), audio path end to end; r8: desktop + dock + installer language step |
 | Browser | NetSurf 3.11 (≈6 MB) with DevOS icon and default web handler; HTTPS and `.deb` download verified |
 
 ## Updates and security
@@ -26,8 +27,8 @@
 | App grid | **DevOS Update** launcher (`devos-update.desktop`) opens the interactive update menu |
 | Automatic | Debian security + DevOS stable updates via `unattended-upgrades` (no auto reboot) |
 | Hardening | nftables default-deny inbound, kernel/network sysctl, AppArmor, time sync, no core dumps |
-| Verified | live `InRelease` + `Release.gpg` `gpgv` Good signatures; end-to-end: installed system upgraded `devos-update` 1.0.0 → 1.0.1 → 1.0.2 → 1.0.4 → 1.0.5 and `devos-audio` 1.0.0 → 1.0.1 → 1.0.2 → 1.0.3 from the live repo |
-| Published | `devos-keyring 1.0.0`, `devos-update 1.0.5`, `devos-audio 1.0.3` (checksums match the `Packages` index) |
+| Verified | live `InRelease` + `Release.gpg` `gpgv` Good signatures; end-to-end: installed system upgraded `devos-update` 1.0.0 → 1.0.1 → 1.0.2 → 1.0.4 → 1.0.5 and `devos-audio` 1.0.0 → 1.0.1 → 1.0.2 → 1.0.3 → 1.0.4 from the live repo |
+| Published | `devos-keyring 1.0.0`, `devos-update 1.0.5`, `devos-audio 1.0.4` (checksums match the `Packages` index) |
 | Automatic scope | Debian `trixie`, `trixie-updates`, `trixie-security` and DevOS stable; codenames pinned explicitly because `os-release` sets `VERSION_CODENAME=devos` |
 
 Release process: [`UPDATES.md`](UPDATES.md). Defaults and limitations: [`SECURITY.md`](SECURITY.md).
@@ -51,6 +52,17 @@ PipeWire 1.4.2 + WirePlumber, `snd-hda-intel`/`snd-sof-pci-intel-tgl` for the ta
 Alder Lake + ALC269 codec. Debian `trixie` has no newer `firmware-sof-signed` in the archive
 (`apt-cache policy` shows 2025.01-1 as candidate), so the firmware was not changed blindly.
 **The actual hardware check still needs one run of `devos-audio diagnose` on the laptop.**
+
+## Audio fix — `devos-audio` 1.0.4 (2026-11-21)
+
+| Item | Value |
+|---|---|
+| Root cause | Default sink stuck on `auto_null` (Dummy Output): WirePlumber's `fallback-sink.lua` creates the dummy on a 1 s timeout while the real sink appears ~27 s late on real hardware; `devos-audio` ≤1.0.3 never switched the default away from the dummy |
+| Fix | `repair_default()` — wait ≤30 s for the real sink, `set-default-sink`, move active `sink-input`s, unmute; new `repair` subcommand; `status`/`diagnose`/`test` now show WARNING/PROBLEM on a dummy/dead default |
+| `sudo` fix | `pa()` wrapper runs all PipeWire/Pulse commands as `$SUDO_USER` with `XDG_RUNTIME_DIR=/run/user/<uid>` — root context previously broke `pactl`/`wpctl`/`systemctl --user` (seen in the laptop journal) |
+| Session guard | `devos-audio-guard.service` (user unit, enabled via `default.target.wants`, `PartOf=pipewire-pulse.service wireplumber.service`) re-repairs the default sink at login and on every audio-stack restart |
+| Verified | KVM live boot: **32/32 checks** — guard ran at session start, `fix`/`repair`/`guard`/`PartOf` all switch `auto_null` → `alsa_output.pci-0000_00_04.0.analog-stereo`, WARNING/PROBLEM branches correct, `devos-audio test` produced a non-silent wav (max\|sample\|=26226), 0 "Cannot persist" |
+| Install | live r11 image + installed system (chroot) + APT `devos-audio 1.0.4` |
 
 
 ## Install to disk (verified)

@@ -3,17 +3,115 @@
 # Hinglish comments: user ko ek command me poora audio report chahiye.
 set -uo pipefail
 
-VERSION="1.0.3"
+VERSION="1.0.4"
 
 say()  { printf '==> %s\n' "$*"; }
 have() { command -v "$1" > /dev/null 2>&1; }
 
-# wireplumber 0.5 me `wpctl get-default` nahi hai — @DEFAULT_AUDIO_SINK@ inspect karo
+# pa() — PipeWire/PulseAudio commands USER-BUS context me chalate hain.
+# Reason: `sudo devos-audio fix` root context me pactl/wpctl/systemctl --user
+# ko /run/user/<uid> nahi milta (real-hw journal me yahi hua tha) — isliye
+# root ke baad bhi SUDO_USER ke bus par hi bhejo.
+pa() {
+    if [ "$(id -u)" -eq 0 ]; then
+        local u="${SUDO_USER:-}"
+        if [ -n "$u" ] && [ "$u" != "root" ] && [ -d "/run/user/$(id -u "$u")" ]; then
+            sudo -u "$u" XDG_RUNTIME_DIR="/run/user/$(id -u "$u")" "$@"
+            return $?
+        fi
+    fi
+    "$@"
+}
+
+# ---- sink helpers (pactl; wireplumber 0.5 me `wpctl get-default` nahi) ----
+
+# pactl se default sink NAME (auto_null = Dummy Output ho sakta hai)
+default_sink_name() {
+    have pactl || return 0
+    pa pactl info 2>/dev/null | sed -n 's/^Default Sink: //p' | head -1
+}
+
+# saare sink names (dummy samet)
+all_sink_names() {
+    have pactl || return 0
+    pa pactl list short sinks 2>/dev/null | awk '{print $2}'
+}
+
+# sirf asli sinks (auto_null Dummy ko chhod ke)
+real_sink_names() {
+    all_sink_names | grep -v '^auto_null$'
+}
+
+# default sink kharab hai? (dummy, khaali, ya list me hi nahi = dead)
+default_sink_bad() {
+    local d
+    d="$(default_sink_name)"
+    [ -z "$d" ] && return 0
+    [ "$d" = "auto_null" ] && return 0
+    all_sink_names | grep -qx "$d" || return 0
+    return 1
+}
+
+# wpctl inspect se description (status display ke liye)
 default_sink() {
-    if have wpctl && wpctl status > /dev/null 2>&1; then
-        wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null \
+    if have wpctl && pa wpctl status > /dev/null 2>&1; then
+        pa wpctl inspect @DEFAULT_AUDIO_SINK@ 2>/dev/null \
             | sed -n 's/^[[:space:]]*node.description = "\(.*\)"/\1/p' | head -1
     fi
+}
+
+# Default sink repair — boot par WirePlumber fallback-sink race se default
+# auto_null (Dummy Output) ban jata hai; boot0 forensics me real sink 27s
+# late aaya tha. wait_secs tak asli sink ka wait karke default wapas asli
+# sink par le aate hain + active streams usi par move karte hain.
+repair_default() {
+    local wait_secs="${1:-30}" waited=0 real d
+    have pactl || { echo "   pactl missing — skip"; return 1; }
+
+    # pipewire-pulse server ka wait
+    while ! pa pactl info >/dev/null 2>&1 && [ "$waited" -lt "$wait_secs" ]; do
+        sleep 1; waited=$((waited + 1))
+    done
+    if ! pa pactl info >/dev/null 2>&1; then
+        echo "   pipewire-pulse not running — skip"
+        echo "   (desktop user ke context me chalao: devos-audio fix)"
+        return 1
+    fi
+
+    # default theek hai to kuch nahi karna
+    if ! default_sink_bad; then
+        echo "   default sink OK: $(default_sink_name)"
+        return 0
+    fi
+
+    # asli sink ka wait (dummy ban chuki ho to real aane tak ruko)
+    waited=0
+    real=""
+    while [ "$waited" -lt "$wait_secs" ]; do
+        real="$(real_sink_names | head -1)"
+        [ -n "$real" ] && break
+        sleep 1; waited=$((waited + 1))
+    done
+    if [ -z "$real" ]; then
+        echo "   no real sink after ${wait_secs}s — sound card not detected"
+        echo "   (full report: devos-audio diagnose)"
+        return 1
+    fi
+
+    d="$(default_sink_name)"
+    echo "   default was '${d:-none}' (dummy/dead) -> switching to '$real'"
+    if pa pactl set-default-sink "$real" 2>/dev/null; then
+        # active streams ko naye sink par move karo (awaaz wapas aa jaye)
+        pa pactl list short sink-inputs 2>/dev/null | awk '{print $1}' | while read -r sid; do
+            [ -n "$sid" ] && pa pactl move-sink-input "$sid" "$real" 2>/dev/null || true
+        done
+        pa pactl set-sink-mute "$real" 0 2>/dev/null || true
+        logger -t devos-audio "default sink repaired: ${d:-none} -> $real" 2>/dev/null || true
+        echo "   streams moved + unmuted: $real"
+        return 0
+    fi
+    echo "   set-default-sink failed"
+    return 1
 }
 
 usage() {
@@ -23,7 +121,8 @@ devos-audio $VERSION — DevOS audio diagnostics
   status    short: cards, sinks, volume, mute
   diagnose  full report (also written to /tmp/devos-audio-report.txt)
   test      play a short test tone on the default output
-  fix       apply safe repairs (group, restart audio stack, unmute)
+  repair    only fix the default sink (dummy/dead -> real), no restart
+  fix       safe repairs: group, unmute, stack restart, default sink repair
   version   print version
   help      this text
 EOF
@@ -57,9 +156,9 @@ do_status() {
     echo "firmware:   $(dpkg-query -W -f='${Version}' firmware-sof-signed 2>/dev/null || echo 'not installed')"
     echo "ucm:        $(dpkg-query -W -f='${Version}' alsa-ucm-conf 2>/dev/null || echo 'not installed')"
     if have wpctl; then
-        if wpctl status >/dev/null 2>&1; then
+        if pa wpctl status >/dev/null 2>&1; then
             echo "pipewire:"
-            wpctl status 2>/dev/null | sed 's/^/  /' | head -40
+            pa wpctl status 2>/dev/null | sed 's/^/  /' | head -40
             echo "default sink: $(default_sink || echo 'unknown')"
         else
             echo "pipewire:   not running (no user session, or PipeWire failed to start)"
@@ -67,8 +166,13 @@ do_status() {
     else
         echo "pipewire:   (wpctl missing)"
     fi
-    if have pactl && pactl info >/dev/null 2>&1; then
-        pactl info 2>/dev/null | grep -E 'Server Name|Default Sink' | sed 's/^/  /'
+    if have pactl && pa pactl info >/dev/null 2>&1; then
+        pa pactl info 2>/dev/null | grep -E 'Server Name|Default Sink' | sed 's/^/  /'
+        if default_sink_bad; then
+            echo "  !! WARNING: default sink is dummy/dead ('$(default_sink_name)')"
+            echo "     -> audio will NOT reach the speakers."
+            echo "     Fix: devos-audio fix"
+        fi
     fi
     if have amixer; then
         echo "master mixer:"
@@ -78,6 +182,7 @@ do_status() {
 
 do_diagnose() {
     local out=/tmp/devos-audio-report.txt
+    local d
     {
         echo "===== DevOS audio report $(date -u +%FT%TZ) ====="
         echo "devos-audio $VERSION"
@@ -123,8 +228,8 @@ do_diagnose() {
         echo
         echo "--- pipewire ---"
         if have wpctl; then
-            if wpctl status >/dev/null 2>&1; then
-                wpctl status 2>&1 | sed 's/^/  /'
+            if pa wpctl status >/dev/null 2>&1; then
+                pa wpctl status 2>&1 | sed 's/^/  /'
                 echo "default sink: $(default_sink || echo 'unknown')"
             else
                 echo "(PipeWire is not running in this context)"
@@ -132,11 +237,26 @@ do_diagnose() {
         else
             echo "(wpctl missing)"
         fi
-        if have pactl && pactl info >/dev/null 2>&1; then
+        if have pactl && pa pactl info >/dev/null 2>&1; then
             echo "--- pactl info ---"
-            pactl info 2>&1 | sed 's/^/  /'
+            pa pactl info 2>&1 | sed 's/^/  /'
             echo "--- pactl sinks ---"
-            pactl list short sinks 2>&1 | sed 's/^/  /'
+            pa pactl list short sinks 2>&1 | sed 's/^/  /'
+        fi
+        echo
+        echo "--- default sink check ---"
+        if have pactl && pa pactl info >/dev/null 2>&1; then
+            d="$(default_sink_name)"
+            echo "default sink: ${d:-none}"
+            echo "all sinks:    $(all_sink_names | tr '\n' ' ')"
+            if default_sink_bad; then
+                echo "PROBLEM: default sink is dummy/dead -> NO SOUND."
+                echo "Fix: devos-audio fix   (auto-repairs: dummy -> real sink + streams moved)"
+            else
+                echo "default sink OK"
+            fi
+        else
+            echo "(pactl/server unavailable)"
         fi
         echo
         echo "--- user session audio ---"
@@ -150,9 +270,18 @@ do_diagnose() {
 
 do_test() {
     local secs="${1:-3}"
+    # dummy/dead default par tone bajega hi nahi — pehle repair, phir play
+    if have pactl && pa pactl info >/dev/null 2>&1 && default_sink_bad; then
+        say "default sink is dummy/dead — repairing first"
+        repair_default 15
+    fi
+    if have pactl && pa pactl info >/dev/null 2>&1 && default_sink_bad; then
+        say "WARNING: default sink still dummy/dead — you will hear nothing"
+        say "run: devos-audio diagnose"
+    fi
     say "playing a ${secs}s test tone on the default output"
     if have speaker-test; then
-        timeout "$secs" speaker-test -t sine -c 2 -f 440 -l 1 2>&1 \
+        pa timeout "$secs" speaker-test -t sine -c 2 -f 440 -l 1 2>&1 \
             | grep -vE 'Write error: -4|xrun_recovery|Transfer failed' | tail -8
         say "if you heard a tone, the audio path works end to end"
     elif have aplay; then
@@ -165,7 +294,7 @@ do_test() {
 
 do_fix() {
     root_or_sudo
-    say "1/4 checking audio group membership"
+    say "1/5 checking audio group membership"
     local user_name="${SUDO_USER:-$USER}"
     if [ -n "$user_name" ] && [ "$user_name" != "root" ]; then
         if id -nG "$user_name" 2>/dev/null | tr ' ' '\n' | grep -qx audio; then
@@ -176,25 +305,29 @@ do_fix() {
         fi
     fi
 
-    say "2/4 unmuting ALSA master (best effort)"
+    say "2/5 unmuting ALSA master (best effort)"
     if have amixer; then
         $CMD amixer -q sset Master unmute 2>/dev/null && echo "   Master unmuted" || true
         $CMD amixer -q sset PCM unmute 2>/dev/null && echo "   PCM unmuted" || true
         $CMD amixer -q -c 0 sset 'Speaker' unmute 2>/dev/null || true
     fi
 
-    say "3/4 restarting the audio stack (PipeWire + WirePlumber)"
+    say "3/5 restarting the audio stack (PipeWire + WirePlumber)"
     if have systemctl; then
-        $CMD systemctl --user restart pipewire.service pipewire-pulse.service 2>&1 | sed 's/^/   /' || true
+        # user-bus commands PA hamesha user context me (sudo root bus nahi pakadta)
+        pa systemctl --user restart pipewire.service pipewire-pulse.service 2>&1 | sed 's/^/   /' || true
         sleep 2
-        $CMD systemctl --user restart wireplumber.service 2>&1 | sed 's/^/   /' || true
-        systemctl --user is-active pipewire.service wireplumber.service pipewire-pulse.service 2>/dev/null | sed 's/^/   /' || true
+        pa systemctl --user restart wireplumber.service 2>&1 | sed 's/^/   /' || true
+        pa systemctl --user is-active pipewire.service wireplumber.service pipewire-pulse.service 2>/dev/null | sed 's/^/   /' || true
     fi
 
-    say "4/4 unmuting the PipeWire default sink"
-    if have wpctl; then
-        wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 2>&1 | sed 's/^/   /' || true
-        wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.5 2>&1 | sed 's/^/   /' || true
+    say "4/5 repairing the default sink (dummy/dead -> real)"
+    repair_default 30
+
+    say "5/5 unmuting the PipeWire default sink"
+    if have wpctl && pa wpctl status >/dev/null 2>&1; then
+        pa wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 2>&1 | sed 's/^/   /' || true
+        pa wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.5 2>&1 | sed 's/^/   /' || true
         echo "   default sink: $(default_sink || echo 'unknown')"
     fi
     say "done — run: devos-audio test"
@@ -204,6 +337,7 @@ case "${1:-status}" in
     status)   do_status ;;
     diagnose) do_diagnose ;;
     test)     do_test "${2:-3}" ;;
+    repair)   say "repairing default sink (no stack restart)"; repair_default 30 ;;
     fix)      do_fix ;;
     version|--version|-v) echo "devos-audio $VERSION" ;;
     help|--help|-h) usage ;;
