@@ -6,28 +6,28 @@ Label: DevOS
 Suite: stable
 Codename: stable
 Version: 1.0
-Date: Sat, 21 Nov 2026 11:23:10 +0000
-Valid-Until: Mon, 21 Dec 2026 11:23:10 +0000
+Date: Sat, 21 Nov 2026 15:27:54 +0000
+Valid-Until: Mon, 21 Dec 2026 15:27:54 +0000
 Architectures: amd64
 Components: main
 Description: DevOS package archive
 Acquire-By-Hash: yes
 MD5Sum:
- 843a7cae4843ee2d8127a4fed666ebb4 2211 main/binary-amd64/Packages
- 25a04415ec9f2dc21fe9c1831b80fd69 1109 main/binary-amd64/Packages.gz
- dd7f32ee5b4cce2f4ab5a03f3fe30ae5 1180 main/binary-amd64/Packages.xz
+ 1988ed0240ab07f22a3f81177237977c 2335 main/binary-amd64/Packages
+ 828dfdb1d4d08a7180c4c5b747e23d78 1182 main/binary-amd64/Packages.gz
+ c425fde75bc94ced7f9552fcc7aa2741 1252 main/binary-amd64/Packages.xz
 SHA1:
- 0695bef16b94c5ebbfa448ccfa6fe6cd69b26352 2211 main/binary-amd64/Packages
- 53345ccd8dd49f94fb226cbb295e0fa1f9deb148 1109 main/binary-amd64/Packages.gz
- fbd9eb011b1815ffa62ec4963d96d1fa291404b0 1180 main/binary-amd64/Packages.xz
+ 6535516a1d26b860b0529c5f366da49c57d22cde 2335 main/binary-amd64/Packages
+ 85d5e023f385520be068c02e193c7820bcb93c58 1182 main/binary-amd64/Packages.gz
+ 55a1781bd2c3779fd8f7cf2b1bbfbe1d000844db 1252 main/binary-amd64/Packages.xz
 SHA256:
- 3ee39b119339097934841e4055659caa9f5368f5ee0230d9e3f360861748cfe5 2211 main/binary-amd64/Packages
- d378703d98d34b9315fc7440eec9359e86000fddb846b6f3f4e6f01f4c68a5e3 1109 main/binary-amd64/Packages.gz
- 0f1663f64295b8ea4256c71bba0dc277f5f73cb9af219956de8edd8fb3cd1431 1180 main/binary-amd64/Packages.xz
+ 8bb93a43676261756465361d5870f48b7fc8c79276c7d4a90f00c283c4850fe5 2335 main/binary-amd64/Packages
+ 61a8396fcead5056a63a7fd4b8dacd43d4dfe3041677b861bd0ecf4303dd3a26 1182 main/binary-amd64/Packages.gz
+ cca63e8e18addfdb819094e90c9cfe540f42e4eb7f13beee377ee06389fa60b0 1252 main/binary-amd64/Packages.xz
 -----BEGIN PGP SIGNATURE-----
 
-iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCawF/HgAKCRCrAe3eAP7C
-S53pAP4hvr6xV1GRdwCqlcODjIshPirKz8k0+DAGL8swhofbgQEAu9vvHGe5H0Rc
-wD5ZukwULf48Va6hVc/tjMQimCtBFQY=
-=1wWt
+iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCawG4egAKCRCrAe3eAP7C
+S3syAP95rDQTbox7edrYqCnlckKf5bJ151z1FucjXb4PsKzk4AD/W0c5AbLvtnhJ
+O7Z1y3t5r1I7f5ugSpBTtTW//BTl/Q4=
+=aiXy
 -----END PGP SIGNATURE-----

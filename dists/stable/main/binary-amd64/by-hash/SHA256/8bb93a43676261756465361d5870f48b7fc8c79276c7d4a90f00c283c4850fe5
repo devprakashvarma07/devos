@@ -1,5 +1,5 @@
 Package: devos-audio
-Version: 1.0.4
+Version: 1.0.5
 Architecture: all
 Maintainer: DevOS <security@devos.local>
 Section: sound
@@ -10,14 +10,15 @@ Description: Audio diagnostics and repair for DevOS
  devos-audio reports the sound cards, kernel modules, firmware, PipeWire
  nodes and mixer state, plays a test tone and applies safe repairs
  (audio group, unmute, audio stack restart, default sink repair from
- dummy/dead to the real sink). Includes a session guard unit that keeps
- the default sink pointed at real hardware, and a "DevOS Audio" launcher
- for the app grid.
-Filename: pool/main/d/devos-audio/devos-audio_1.0.4_all.deb
-Size: 6632
-MD5sum: 675c1d38ca3d901579e52969ee6bef62
-SHA1: 0b4b480ba0ebfabdd849b6a688c20956953270cf
-SHA256: 5e653c9b402d9e161c99d14201748a1d7e1c364157550a08aa12b9f9fcd4973c
+ dummy/dead to the real sink, volume floor, stray stream move). Includes
+ an end-to-end "verify" command (tone -> real sink capture -> PASS/FAIL),
+ a session guard unit that keeps the output ready at login and on every
+ audio-stack restart, and a "DevOS Audio" launcher for the app grid.
+Filename: pool/main/d/devos-audio/devos-audio_1.0.5_all.deb
+Size: 8580
+MD5sum: a16107ce9e5c7206aef0467f52f78e2d
+SHA1: b8e4a8b686f3795b88e13a771098edc5b50cac75
+SHA256: 7e8577cf8b4927dd7a892dbed0a9d6f6498e21d249dc52d13605480a9fb2a6e5
 
 Package: devos-keyring
 Version: 1.0.0
@@ -32,9 +33,9 @@ Description: DevOS package archive signing key and APT source
  InRelease file over HTTPS.
 Filename: pool/main/d/devos-keyring/devos-keyring_1.0.0_all.deb
 Size: 1192
-MD5sum: c21b6ad36ddde372de5551d7dabfc4de
-SHA1: df572e86760563204196ab6f0494883f298d5b20
-SHA256: 6650c16ba548420c9c466169b429438aaacf5b12257b65fd30aa9ad1e4698323
+MD5sum: ad1d481fd9048936f092efa3818c0627
+SHA1: 827d3f096bac5966c19fa714bee14bc0f9d61696
+SHA256: bff028b490caa43c1d4acfab36b4b3daf37ed333886ffc47df61107c49c37d24
 
 Package: devos-update
 Version: 1.0.5
@@ -50,6 +51,6 @@ Description: Safe update manager for DevOS
  security upgrades.
 Filename: pool/main/d/devos-update/devos-update_1.0.5_all.deb
 Size: 4232
-MD5sum: 39e8f7df50efe6f19d67fd5258096a9c
-SHA1: fa7bd0f6049635f1da8d4fd5b80fa96b66f9fc6b
-SHA256: 20024d212a5382d418ae1943995eb2312ed995094fe828f736698c7d6a67216b
+MD5sum: 40a4e2b0925162b3114327d306cfa340
+SHA1: bf362a84ed5172a3cb51a4e658d202155f9e572e
+SHA256: 34f9ffa5361833ff0ac39dab0ecef09c8dbb828fdfb793d69bc31f2dd18ee498
