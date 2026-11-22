@@ -132,6 +132,25 @@ app bhi nahi tha). Ab DevOS ka apna installer hai:
 | Verified | p2 + rootfs: `gio mime` → default **and** registered; `xdg-open sample.deb` → window `"DevOS App Installer"` (Xvfb); helper installed a real dummy `.deb` (marker file present), purge clean; helper exit 0 on an already-installed package |
 
 
+## Rootfs config overlay (2026-11-22)
+
+System-level configs that ship in the image, versioned under `configs/rootfs/` and applied to a
+rootfs tree with `sudo ./scripts/desktop/apply-rootfs-configs.sh [rootfs-dir]` (default
+`/mnt/devos/rootfs`). Run it before `mksq.sh` when building an ISO.
+
+| Config | What it does |
+|---|---|
+| `etc/modprobe.d/hda-jack-retask.conf` + `usr/lib/firmware/hda-jack-retask.fw` + `etc/initramfs-tools/hooks/hda-jack-retask` | **Audio fix** — HDA jack pin retask for the target codec (ALC269 subsystem `0x2782:0250`, equivalent to upstream kernel commit `fd71820`): pin `0x14` = not connected, pin `0x1b` = internal speaker. Loaded via `snd-hda-intel patch=`; the initramfs hook copies the firmware in early. |
+| `etc/sysctl.d/99-devos-performance.conf` | Responsiveness tuning — `swappiness=10`, `vfs_cache_pressure=50`, dirty ratios, `page-cluster=0`, `inotify watches=524288`. |
+| `etc/default/grub` | Boot menu — timeout 3 s, `transparent_hugepage=madvise`, `GRUB_DISABLE_OS_PROBER=false` (detects the other OS for the dual-boot menu). |
+| `etc/systemd/system/devos-update.timer.d/override.conf` | Update check daily + 30 min random delay. |
+| `etc/systemd/system/man-db.timer.d/override.conf` | `man-db` regeneration weekly. |
+| `etc/sudoers.d/dev-nopasswd` | User `dev` gets passwordless `sudo` (personal autologin desktop). |
+
+Not carried into the image: per-user NetworkManager hotspot connections (device credentials),
+the OpenCode AppArmor profile (OpenCode is not in the image), and `locale.gen` (the image already
+sets `LANG=en_US.UTF-8`).
+
 ## Install to disk (verified)
 
 Installed alongside Ubuntu on the target laptop's NVMe, on a dedicated partition.
