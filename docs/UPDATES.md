@@ -83,8 +83,14 @@ curl -fsS https://devprakashvarma07.github.io/devos/dists/stable/InRelease | hea
 #    (existing tag par asset --clobber se upload hota hai, SHA256SUMS merge hota hai)
 #    **release-iso.sh = ON HOLD until the user approves ISO upload** — do not run it
 #    without asking. devos-audio/Brave-only updates are released via steps 1–4, never ISO.
-./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r13.iso
+./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r14.iso
 ```
+
+**Super/launchpad key defaults (r14, 2026-11-22)** — ISO-only change (no new APT package): the
+Windows/Super key opens the apps menu. Lives in the compositor's skel config (`compositor.conf`,
+dropped into each new user's `.config` tree: `[Keyboard] shortcutConvention=pc` +
+`[Shortcuts]`/`[CommandShortcuts]` `toggle-app-list` taps).
+ISO push (step 5) still holds until user approval.
 
 **devos-audio 1.0.5 + 1.0.6 (r12, 2026-11-21)** — publish via the normal APT flow (steps 2–4);
 ISO push (step 5) holds until user approval. 1.0.6 = parsing fix (verbose
