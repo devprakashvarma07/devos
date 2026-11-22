@@ -18,9 +18,27 @@ Description: Audio diagnostics and repair for DevOS
  "Input #N" lines have no $3 field (id is $2 minus '#').
 Filename: pool/main/d/devos-audio/devos-audio_1.0.6_all.deb
 Size: 9234
-MD5sum: bfab4968abedf04509d02801e6ed3226
-SHA1: 50625d66d9a810cdd5c0fa2d3da37fa082fd11fc
-SHA256: 4ced9f725dbad2456743a352413b07a5ffcde375c812a5cedabcefdb74beb3e6
+MD5sum: 66f45e61acab2f1feb7af5836e9fb0d5
+SHA1: b662adb8de4aedcbd945bef5e21967ab0d53665f
+SHA256: 740356d7731434df08760a610ab8e52364825b6adcb2ee7656f252e93586c067
+
+Package: devos-deb-installer
+Version: 1.0.0
+Section: admin
+Priority: optional
+Architecture: all
+Depends: python3, python3-gi, gir1.2-gtk-3.0, dpkg, apt, shared-mime-info, desktop-file-utils, pkexec | policykit-1, sudo
+Maintainer: DevOS <security@devos.local>
+Description: DevOS App Installer — .deb files ke liye GUI installer
+ .deb file par double-click karne se DevOS App Installer khulta hai:
+ package ka naam/version/size dikhata hai, polkit se password leta hai
+ (Cutefish polkit agent) aur `apt-get install -y ./file.deb` se install
+ karta hai — dependencies bhi khud resolve hoti hain.
+Filename: pool/main/d/devos-deb-installer/devos-deb-installer_1.0.0_all.deb
+Size: 6604
+MD5sum: 94f0e8cc62402d09f82c94a4b70c3dee
+SHA1: 54265f0c99c1ee3eb2eb9aed82c588694f4940ec
+SHA256: 8f58c772a4d72c1faf24fc28c73c9a76b68120aab8a54dc54dc8f4b1aa78e0ce
 
 Package: devos-keyring
 Version: 1.0.0
@@ -35,9 +53,9 @@ Description: DevOS package archive signing key and APT source
  InRelease file over HTTPS.
 Filename: pool/main/d/devos-keyring/devos-keyring_1.0.0_all.deb
 Size: 1192
-MD5sum: 395d45767bd1d4174ec263b5ebb63bbf
-SHA1: dc759a74fb746954005d07257360a17b8c3b363a
-SHA256: 79c1f6aaf344d485eb5b65d5a5404ffc726d547ff59a28bc4967980c8692b574
+MD5sum: 6c7c230985a59559a98e7311d5614c29
+SHA1: ae4cda6d39456b328066e20abc9ebafcd7b8eae6
+SHA256: 1a9d4ba2a9a5e75387a6aaff51ecde2228ed98c7b694245b1898b4afe1d915fc
 
 Package: devos-update
 Version: 1.0.5
@@ -53,6 +71,6 @@ Description: Safe update manager for DevOS
  security upgrades.
 Filename: pool/main/d/devos-update/devos-update_1.0.5_all.deb
 Size: 4232
-MD5sum: 2574872ebbb26062086264c92b1d1841
-SHA1: 6f3bcaf7782529615fb2d48fb211d85acb4b535f
-SHA256: 81f4814abd9066b957c2eaa45e1299153af93e23ebe667be3299ac3e0c5ef317
+MD5sum: 23bc2bd38c9a58d4b1b1ba3b5ef8b66a
+SHA1: 2d11fef87a295c77693c6104b7977699edc41629
+SHA256: 15f57606e1b54f31628df352333da52fa0c993eafb965fc71d046b934a725010
