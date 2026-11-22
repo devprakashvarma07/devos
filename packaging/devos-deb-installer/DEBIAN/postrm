@@ -1,0 +1,14 @@
+#!/bin/bash
+# DevOS App Installer — postrm (remove/purge par handler wapas hatao)
+set -e
+
+MIME_LIST=/etc/xdg/mimeapps.list
+if [ -f "$MIME_LIST" ]; then
+    sed -i '/^application\/vnd\.debian\.binary-package=devos-deb-installer\.desktop$/d' "$MIME_LIST" || true
+    sed -i '/^application\/x-deb=devos-deb-installer\.desktop$/d' "$MIME_LIST" || true
+fi
+
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database -q /usr/share/applications || true
+fi
+exit 0

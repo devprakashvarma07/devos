@@ -1,0 +1,3 @@
+#!/bin/bash
+# sudo -A askpass wrapper — GTK password dialog (DevOS App Installer ka hissa)
+exec /usr/bin/devos-deb-installer --askpass "$@"

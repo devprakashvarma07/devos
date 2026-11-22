@@ -6,9 +6,10 @@
 
 | Item | Value |
 |---|---|
-| File (latest) | `devos-1.0-amd64-r12.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
-| Size | 1.66 GiB (1,667,891,200 B) |
-| sha256 (r12) | `e3d315d205ea6b479b80273def078402a7fd0795bd99dcde28af871e22f40ca3` |
+| File (latest) | `devos-1.0-amd64-r13.iso` (build copy: `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| Size | 1.66 GiB (1,669,529,600 B) |
+| sha256 (r13) | `f56f5aa57852ece7b6cf5b95917890d873d310b62fef4b21e7d17f38c040a22f` |
+| r13 changes | `.deb` double-click ab **DevOS App Installer** (`devos-deb-installer 1.0.0`) kholta hai — GTK3 UI (package info + Install + live apt log), `pkexec` polkit password prompt (`sudo -A` + GTK askpass fallback), `apt-get install -y ./file.deb` (deps auto-resolve); MIME handler `application/vnd.debian.binary-package` + `application/x-deb` (system + user mimeapps, `mimeinfo.cache`); new deps `gir1.2-gtk-3.0` + `desktop-file-utils` in rootfs + p2; APT published 1.0.0 |
 | r12 changes | `devos-audio` **1.0.5 + 1.0.6**: 1.0.5 — new `verify` (tone → real-sink `.monitor` capture → PASS/FAIL), new `ensure_output()` (unmute + volume floor <10%→50% + move streams stuck on `auto_null` to the default — now also runs on the "default sink OK" path), guard 1.0.5 same ensure on every restart; 1.0.6 — parsing fix — PW 1.4.2 verbose: `Sink Input #N` ($3="#N"); sink line `    Sink: 55` = sink INDEX; main + guard now parse it (stuck = Sink: index == auto_null INDEX); move by INDEX (move by NAME = "No such entity"); status loop fixed); **Brave 157.1.99.57 preloaded** (cloned from this laptop's `/opt/brave.com/brave`), Brave = default browser (NetSurf kept); new `scripts/desktop/install-brave.sh`; zstd-compressed squashfs contains all of the above |
 | r11 | `devos-1.0-amd64-r11.iso` (1,469,054,976 B, sha256 `a3d1479f1d403854fecc61e34d865a01557441302c25a2795fe5b739d03d94c4`) — `devos-audio` **1.0.4**: default-sink repair (dummy/dead `auto_null` → real hardware + active streams moved + unmuted), new `repair` subcommand, `pa()` user-bus wrapper so `sudo devos-audio fix` works, WARNING/PROBLEM in `status`/`diagnose`/`test`, and a session guard that re-repairs the default sink at login and on every audio-stack restart; 32/32 audio suite on KVM |
 | r10 (previous) | `24bf761e5b305ca4bdcabdca7bad8fe7af045c2549d8d8f48b9a97fa943e0997` — `devos-session` + `devos-compositor` string-view hardening (explicit-length suffix views retargeted, log/identity lengths corrected — full audit of all 11 rebranded binaries: 0 broken views); `/etc/skel` first-boot defaults baked from live user settings (dock icon size 34 + glass, tap-to-click, dark theme) |
@@ -29,7 +30,7 @@
 | Automatic | Debian security + DevOS stable updates via `unattended-upgrades` (no auto reboot) |
 | Hardening | nftables default-deny inbound, kernel/network sysctl, AppArmor, time sync, no core dumps |
 | Verified | live `InRelease` + `Release.gpg` `gpgv` Good signatures; end-to-end: installed system upgraded `devos-update` 1.0.0 → 1.0.1 → 1.0.2 → 1.0.4 → 1.0.5 and `devos-audio` 1.0.0 → 1.0.1 → 1.0.2 → 1.0.3 → 1.0.4 from the live repo |
-| Published | `devos-keyring 1.0.0`, `devos-update 1.0.5`, `devos-audio 1.0.4` (checksums match the `Packages` index) |
+| Published | `devos-keyring 1.0.0`, `devos-update 1.0.5`, `devos-audio 1.0.6`, `devos-deb-installer 1.0.0` (checksums match the `Packages` index) |
 | Automatic scope | Debian `trixie`, `trixie-updates`, `trixie-security` and DevOS stable; codenames pinned explicitly because `os-release` sets `VERSION_CODENAME=devos` |
 
 Release process: [`UPDATES.md`](UPDATES.md). Defaults and limitations: [`SECURITY.md`](SECURITY.md).
@@ -102,10 +103,30 @@ file + DNS timeouts), so cloning is the verified-reliable path.
 
 | Item | Value |
 |---|---|
-| ISO r12 | `devos-1.0-amd64-r12.iso` — 1,667,891,200 B, sha256 `e3d315d205ea6b479b80273def078402a7fd0795bd99dcde28af871e22f40ca3` |
+| ISO r13 | `devos-1.0-amd64-r13.iso` — 1,669,529,600 B, sha256 `f56f5aa57852ece7b6cf5b95917890d873d310b62fef4b21e7d17f38c040a22f` (adds `devos-deb-installer` + `desktop-file-utils`; squashfs brand check 0 hits) |
+| ISO r12 (previous) | `devos-1.0-amd64-r12.iso` — 1,667,891,200 B, sha256 `e3d315d205ea6b479b80273def078402a7fd0795bd99dcde28af871e22f40ca3` |
 | VM suite | **49/49 on KVM/QEMU** (27 audio incl. `devos-audio verify` = PASS + stuck-stream guard test, 13 Brave/QEMU: binary + entry points + desktop + icons + default + `ldd` + headless launch) — transcript: `/tmp/opencode/r12-test-run.log` |
-| Artifacts | `artifacts/devos-1.0/devos-1.0-amd64-r12.iso` + `.sha256` — latest confirmed (also `/mnt/devos/out/devos-1.0-amd64.iso`) |
+| Artifacts | `artifacts/devos-1.0/devos-1.0-amd64-r13.iso` + `.sha256` — latest confirmed (also `/mnt/devos/out/devos-1.0-amd64.iso`) |
 | Approval gate | Release ISO upload = ON HOLD until user says (`release-iso.sh` retry loop exists; do not run) |
+
+## App installer — `.deb` double-click (`devos-deb-installer` 1.0.0, 2026-11-22)
+
+Real-boot report: `.deb` par double-click karne se **kuch nahi hota tha** — system me
+`application/vnd.debian.binary-package` ka koi handler hi nahi tha (aur `gdebi`/installer
+app bhi nahi tha). Ab DevOS ka apna installer hai:
+
+| Item | Value |
+|---|---|
+| Handler | `devos-deb-installer.desktop` → `devos-deb-installer %f`; MIME `application/vnd.debian.binary-package` + `application/x-deb` |
+| UI | GTK3 (`python3-gi`): package name/version/arch/size + description, **Install** button, live `apt` log, success/error dialogs |
+| Auth | `pkexec` (DevOS polkit agent password prompt); fallback `sudo -A` + built-in GTK askpass dialog |
+| Install | `apt-get install -y ./file.deb` (helper) — dependencies auto-resolve, `--force-confdef/confold` |
+| Registration | `/etc/xdg/mimeapps.list` (system) + `~/.config/mimeapps.list` (user) + `mimeinfo.cache` (`desktop-file-utils`) |
+| CLI | `devos-deb-installer file.deb`, `devos-deb-installer --info file.deb` (headless metadata) |
+| Files | `/usr/bin/devos-deb-installer`, `/usr/libexec/devos-deb-install-helper`, `/usr/libexec/devos-askpass`, desktop + hicolor SVG |
+| New deps | `gir1.2-gtk-3.0`, `desktop-file-utils` (installed into rootfs + p2) |
+| APT | `devos-deb-installer 1.0.0` published on `gh-pages` (`d62d203`) |
+| Verified | p2 + rootfs: `gio mime` → default **and** registered; `xdg-open sample.deb` → window `"DevOS App Installer"` (Xvfb); helper installed a real dummy `.deb` (marker file present), purge clean; helper exit 0 on an already-installed package |
 
 
 ## Install to disk (verified)

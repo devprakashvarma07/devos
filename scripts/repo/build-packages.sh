@@ -22,7 +22,7 @@ for dir in "$ROOT"/packaging/*/; do
     # scripts must be executable inside the package
     while IFS= read -r -d '' file; do
         case "$file" in
-            "$dir"usr/bin/*|"$dir"DEBIAN/postinst|"$dir"DEBIAN/prerm|"$dir"DEBIAN/postrm)
+            "$dir"usr/bin/*|"$dir"usr/libexec/*|"$dir"DEBIAN/postinst|"$dir"DEBIAN/prerm|"$dir"DEBIAN/postrm)
                 chmod 0755 "$file"
                 ;;
         esac

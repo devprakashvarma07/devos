@@ -1,0 +1,24 @@
+#!/bin/bash
+# DevOS App Installer — postinst
+# .deb MIME type ka default handler set karta hai (double-click -> installer).
+set -e
+
+MIME_LIST=/etc/xdg/mimeapps.list
+ENTRY1='application/vnd.debian.binary-package=devos-deb-installer.desktop'
+ENTRY2='application/x-deb=devos-deb-installer.desktop'
+
+if [ -f "$MIME_LIST" ] && ! grep -q '^application/vnd.debian.binary-package=' "$MIME_LIST"; then
+    if grep -q '^\[Default Applications\]' "$MIME_LIST"; then
+        sed -i "/^\[Default Applications\]/a ${ENTRY1}\n${ENTRY2}" "$MIME_LIST"
+    else
+        printf '\n[Default Applications]\n%s\n%s\n' "$ENTRY1" "$ENTRY2" >> "$MIME_LIST"
+    fi
+fi
+
+# file manager / menu ke liye desktop database refresh
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database -q /usr/share/applications || true
+fi
+
+echo "devos-deb-installer: .deb handler = devos-deb-installer.desktop (double-click ready)"
+exit 0

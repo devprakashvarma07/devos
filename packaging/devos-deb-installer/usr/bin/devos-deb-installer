@@ -1,0 +1,399 @@
+#!/usr/bin/env python3
+# DevOS App Installer — .deb files ke liye GUI installer (GTK3 / python3-gi)
+#
+# Flow:
+#   double-click foo.deb -> ye app -> package info + Install button
+#   Install -> pkexec helper (DevOS polkit agent password prompt)
+#           -> helper: apt-get install -y ./foo.deb (deps bhi resolve)
+#           -> live log window me, ant me success/error dialog
+#   pkexec fail (koi agent nahi) -> sudo -A + apna GTK askpass dialog.
+#
+# CLI:
+#   devos-deb-installer file.deb   -> GUI
+#   devos-deb-installer --info file.deb -> metadata (headless test)
+#   devos-deb-installer --askpass  -> sudo askpass mode (SUDO_ASKPASS)
+
+import os
+import shutil
+import subprocess
+import sys
+import threading
+
+APP_NAME = "DevOS App Installer"
+HELPER = "/usr/libexec/devos-deb-install-helper"
+ASKPASS = "/usr/libexec/devos-askpass"
+
+
+def gtk_init_or_die():
+    import gi
+    gi.require_version("Gtk", "3.0")
+    from gi.repository import Gtk
+    try:
+        ok = Gtk.init_check(sys.argv)
+        if isinstance(ok, tuple):
+            ok = ok[0]
+    except Exception:
+        ok = True
+    if not ok:
+        sys.stderr.write("devos-deb-installer: display nahi mila\n")
+        sys.exit(1)
+    return Gtk
+
+
+def human_size(kb):
+    try:
+        kb = int(kb)
+    except (TypeError, ValueError):
+        return ""
+    if kb >= 1024 * 1024:
+        return "%.2f GiB" % (kb / 1024.0 / 1024.0)
+    if kb >= 1024:
+        return "%.1f MiB" % (kb / 1024.0)
+    return "%d KiB" % kb
+
+
+def deb_info(path):
+    """dpkg-deb -f se metadata; (dict, error) return karta hai."""
+    fields = ["Package", "Version", "Architecture", "Installed-Size",
+              "Maintainer", "Description"]
+    try:
+        r = subprocess.run(["dpkg-deb", "-f", path] + fields,
+                           capture_output=True, text=True)
+    except FileNotFoundError:
+        return None, "dpkg-deb installed nahi hai"
+    if r.returncode != 0:
+        return None, (r.stderr.strip() or "ye valid .deb file nahi lagti")
+    info = {}
+    key = None
+    for line in r.stdout.splitlines():
+        if line[:1] in (" ", "\t") and key:
+            info[key] = (info.get(key, "") + " " + line.strip()).strip()
+            continue
+        if ":" in line:
+            key, val = line.split(":", 1)
+            key = key.strip()
+            info[key] = val.strip()
+    return info, None
+
+
+def info_main(path):
+    info, err = deb_info(path)
+    if err:
+        sys.stderr.write("ERROR: %s\n" % err)
+        return 1
+    for k in ("Package", "Version", "Architecture", "Installed-Size",
+              "Maintainer", "Description"):
+        if k in info:
+            print("%-15s %s" % (k + ":", info[k]))
+    return 0
+
+
+# ---------------------------------------------------------------- askpass ----
+
+def askpass_main(prompt=""):
+    """GTK password dialog — password stdout par (sudo -A ke liye)."""
+    Gtk = gtk_init_or_die()
+    from gi.repository import Gtk as G
+
+    dlg = G.Dialog(title="DevOS — Administrator")
+    dlg.set_default_size(380, -1)
+    dlg.set_border_width(12)
+    cancel = dlg.add_button("Cancel", G.ResponseType.CANCEL)
+    ok = dlg.add_button("Authenticate", G.ResponseType.OK)
+    ok.set_can_default(True)
+    ok.grab_default()
+
+    box = dlg.get_content_area()
+    box.set_spacing(10)
+    lbl = G.Label(label=prompt or "Password required (administrator):")
+    lbl.set_xalign(0)
+    lbl.set_line_wrap(True)
+    entry = G.Entry()
+    entry.set_visibility(False)
+    entry.set_input_purpose(G.InputPurpose.PASSWORD)
+    entry.set_activates_default(True)
+    entry.set_placeholder_text("Password")
+    box.pack_start(lbl, False, False, 0)
+    box.pack_start(entry, False, False, 0)
+    dlg.show_all()
+    resp = dlg.run()
+    pw = entry.get_text()
+    dlg.destroy()
+    if resp != G.ResponseType.OK:
+        return 1
+    sys.stdout.write(pw + "\n")
+    sys.stdout.flush()
+    return 0
+
+
+# ------------------------------------------------------------------- gui ----
+
+class Installer:
+    def __init__(self, path):
+        self.path = os.path.abspath(path)
+        self.info, self.err = deb_info(self.path)
+        self.installing = False
+        self.Gtk = gtk_init_or_die()
+        from gi.repository import GLib
+        self.GLib = GLib
+        self.build()
+
+    # -- window ----------------------------------------------------------
+    def build(self):
+        G = self.Gtk
+
+        self.win = G.Window(title=APP_NAME)
+        self.win.set_default_size(560, 430)
+        self.win.set_border_width(0)
+        self.win.set_icon_name("devos-deb-installer")
+        self.win.connect("destroy", G.main_quit)
+
+        outer = G.Box(orientation=G.Orientation.VERTICAL, spacing=0)
+        self.win.add(outer)
+
+        header = G.Box(orientation=G.Orientation.HORIZONTAL, spacing=14)
+        header.set_border_width(18)
+        header.get_style_context().add_class("devos-header")
+
+        icon = G.Image.new_from_icon_name("devos-deb-installer",
+                                          G.IconSize.DIALOG)
+        icon.set_pixel_size(64)
+        header.pack_start(icon, False, False, 0)
+
+        titles = G.Box(orientation=G.Orientation.VERTICAL, spacing=2)
+        t = G.Label()
+        t.set_markup("<span size='large' weight='bold'>Install package</span>")
+        t.set_xalign(0)
+        titles.pack_start(t, False, False, 0)
+
+        if self.info:
+            sub = "%s %s  •  %s  •  %s" % (
+                self.info.get("Package", "?"),
+                self.info.get("Version", ""),
+                self.info.get("Architecture", ""),
+                human_size(self.info.get("Installed-Size")))
+        else:
+            sub = os.path.basename(self.path)
+        s = G.Label()
+        s.set_markup("<span alpha='70%%'>%s</span>"
+                     % self.GLib.markup_escape_text(sub.strip()))
+        s.set_xalign(0)
+        from gi.repository import Pango
+        s.set_ellipsize(Pango.EllipsizeMode.END)
+        titles.pack_start(s, False, False, 0)
+        header.pack_start(titles, True, True, 0)
+        outer.pack_start(header, False, False, 0)
+
+        body = G.Box(orientation=G.Orientation.VERTICAL, spacing=10)
+        body.set_border_width(18)
+
+        if self.err:
+            msg = G.Label()
+            msg.set_markup("<b>Package padhi nahi ja saki</b>\n%s"
+                           % self.GLib.markup_escape_text(self.err))
+            msg.set_xalign(0)
+            msg.set_line_wrap(True)
+            body.pack_start(msg, False, False, 0)
+        else:
+            desc = (self.info.get("Description") or "").strip()
+            if desc:
+                d = G.Label(label=desc)
+                d.set_xalign(0)
+                d.set_line_wrap(True)
+                d.set_max_width_chars(64)
+                body.pack_start(d, False, False, 0)
+
+            self.progress = G.ProgressBar()
+            self.progress.set_show_text(False)
+            self.progress.set_no_show_all(True)
+            body.pack_start(self.progress, False, False, 0)
+
+            self.logview = G.TextView()
+            self.logview.set_editable(False)
+            self.logview.set_cursor_visible(False)
+            self.logview.set_monospace(True)
+            self.logbuf = self.logview.get_buffer()
+            sw = G.ScrolledWindow()
+            sw.set_policy(G.PolicyType.AUTOMATIC, G.PolicyType.AUTOMATIC)
+            sw.set_shadow_type(G.ShadowType.IN)
+            sw.set_size_request(-1, 170)
+            sw.add(self.logview)
+            self.logbox = sw
+            self.logbox.set_no_show_all(True)
+            body.pack_start(self.logbox, True, True, 0)
+
+        outer.pack_start(body, True, True, 0)
+
+        btns = G.Box(orientation=G.Orientation.HORIZONTAL, spacing=8)
+        btns.set_border_width(12)
+        btns.set_homogeneous(False)
+        self.close_btn = G.Button(label="Close")
+        self.close_btn.connect("clicked", lambda *_: self.win.destroy())
+        btns.pack_end(self.close_btn, False, False, 0)
+
+        self.install_btn = G.Button(label="Install")
+        self.install_btn.get_style_context().add_class("suggested-action")
+        self.install_btn.connect("clicked", self.on_install)
+        btns.pack_end(self.install_btn, False, False, 0)
+        outer.pack_end(btns, False, False, 0)
+
+        if self.err:
+            self.install_btn.set_sensitive(False)
+
+        self.win.show_all()
+        if not self.err:
+            self.logbox.hide()
+            self.progress.hide()
+
+    # -- helpers ---------------------------------------------------------
+    def log(self, text):
+        def _add():
+            end = self.logbuf.get_end_iter()
+            self.logbuf.insert(end, text.rstrip("\n") + "\n")
+            mark = self.logbuf.create_mark(None, self.logbuf.get_end_iter(),
+                                           False)
+            tv = self.logview
+            tv.scroll_mark_onscreen(mark)
+            return False
+        self.GLib.idle_add(_add)
+
+    def pulse_start(self):
+        def _pulse():
+            if not self.installing:
+                return False
+            self.progress.pulse()
+            return True
+        self.installing = True
+        self.GLib.timeout_add(120, _pulse)
+
+    def set_busy(self, busy):
+        self.installing = busy
+        self.install_btn.set_sensitive(not busy and not self.err)
+        self.close_btn.set_sensitive(not busy)
+        if busy:
+            self.install_btn.set_label("Installing…")
+            self.progress.show()
+            self.logbox.show()
+        else:
+            self.install_btn.set_label("Install")
+
+    def message(self, kind, text, secondary=None):
+        G = self.Gtk
+        dlg = G.MessageDialog(transient_for=self.win,
+                              modal=True,
+                              message_type=kind,
+                              buttons=G.ButtonsType.CLOSE,
+                              text=text)
+        if secondary:
+            dlg.format_secondary_text(secondary)
+        dlg.run()
+        dlg.destroy()
+
+    # -- install ---------------------------------------------------------
+    def on_install(self, *_):
+        if self.installing:
+            return
+        self.set_busy(True)
+        self.log("%s — %s" % (APP_NAME, self.path))
+        threading.Thread(target=self._worker, daemon=True).start()
+
+    def _run_stream(self, cmd, env=None):
+        """Command chalao, output line-by-line log karo; (rc, text)."""
+        text = []
+        try:
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                 stderr=subprocess.STDOUT,
+                                 stdin=subprocess.DEVNULL,
+                                 text=True, bufsize=1, env=env)
+        except FileNotFoundError:
+            self.log("ERROR: %s installed nahi hai" % cmd[0])
+            return 127, "missing binary"
+        assert p.stdout is not None
+        for line in p.stdout:
+            text.append(line)
+            self.log(line)
+        p.wait()
+        return p.returncode, "".join(text)
+
+    def _worker(self):
+        auth_failed = False
+        if os.geteuid() == 0:
+            rc, out = self._run_stream([HELPER, self.path])
+        else:
+            exe = shutil.which("pkexec")
+            if exe:
+                rc, out = self._run_stream([exe, HELPER, self.path])
+                low = out.lower()
+                auth_failed = (rc in (126, 127) or
+                               "not authorized" in low or
+                               "authentication agent" in low or
+                               "no agent" in low)
+            else:
+                auth_failed = True
+                rc, out = 127, "pkexec missing"
+
+            if auth_failed and rc not in (0,):
+                self.log("-- pkexec se auth nahi hua, sudo fallback --")
+                env = dict(os.environ)
+                env["SUDO_ASKPASS"] = ASKPASS
+                env.pop("SUDO_ASKPASS_REQUIRE", None)
+                rc, out = self._run_stream(["sudo", "-A", HELPER, self.path],
+                                           env=env)
+        self.GLib.idle_add(self._done, rc, out)
+
+    def _done(self, rc, out):
+        self.set_busy(False)
+        self.progress.set_fraction(1.0 if rc == 0 else 0.0)
+        low = (out or "").lower()
+        if rc == 0:
+            self.message(
+                self.Gtk.MessageType.INFO, "Package installed",
+                "%s install ho gaya. App menu me naya entry aa gaya hoga."
+                % self.info.get("Package", "Package"))
+        elif rc in (126, 127) or "not authorized" in low:
+            self.message(
+                self.Gtk.MessageType.WARNING, "Authentication cancelled",
+                "Password nahi mila / cancel ho gaya — kuch install nahi hua.")
+        elif "could not get lock" in low or "unable to acquire the dpkg" in low:
+            self.message(
+                self.Gtk.MessageType.WARNING, "Package manager busy",
+                "Koi aur update/install chal raha hai. Thodi der baad retry "
+                "karo (ya: sudo apt-get -f install).")
+        else:
+            self.message(
+                self.Gtk.MessageType.ERROR, "Install failed",
+                "apt-get exit code %d. Log dekho; dependency issue ho to "
+                "terminal me: sudo apt-get -f install" % rc)
+        return False
+
+    def run(self):
+        self.Gtk.main()
+
+
+def main(argv):
+    args = [a for a in argv[1:] if not a.startswith("--")]
+    flags = {a for a in argv[1:] if a.startswith("--")}
+
+    if "--askpass" in flags:
+        prompt = " ".join(a for a in args if not a.startswith("["))
+        return askpass_main(prompt)
+
+    if "--info" in flags:
+        if not args:
+            sys.stderr.write("usage: devos-deb-installer --info file.deb\n")
+            return 2
+        return info_main(args[0])
+
+    if not args:
+        sys.stderr.write(
+            "usage: devos-deb-installer file.deb\n"
+            "       devos-deb-installer --info file.deb\n")
+        return 2
+
+    app = Installer(args[0])
+    app.run()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

@@ -83,7 +83,7 @@ curl -fsS https://devprakashvarma07.github.io/devos/dists/stable/InRelease | hea
 #    (existing tag par asset --clobber se upload hota hai, SHA256SUMS merge hota hai)
 #    **release-iso.sh = ON HOLD until the user approves ISO upload** — do not run it
 #    without asking. devos-audio/Brave-only updates are released via steps 1–4, never ISO.
-./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r12.iso
+./scripts/repo/release-iso.sh v1.0.0 artifacts/devos-1.0/devos-1.0-amd64-r13.iso
 ```
 
 **devos-audio 1.0.5 + 1.0.6 (r12, 2026-11-21)** — publish via the normal APT flow (steps 2–4);
@@ -94,6 +94,25 @@ ISO push (step 5) holds until user approval. 1.0.6 = parsing fix (verbose
 ./scripts/repo/build-repo.sh   # devos-audio 1.0.5 visible in Packages
 ./scripts/repo/publish.sh
 ```
+
+**devos-deb-installer 1.0.0 (2026-11-22)** — `.deb` double-click handler. Published on
+`gh-pages` (`d62d203`); installed into rootfs + p2 at build time (r13 ISO).
+
+```
+./scripts/repo/build-packages.sh   # devos-deb-installer_1.0.0_all.deb
+./scripts/repo/build-repo.sh
+./scripts/repo/publish.sh
+```
+
+Install on an existing r12 system without waiting for the next ISO:
+
+```
+sudo apt-get update && sudo apt-get install -y devos-deb-installer
+```
+
+`.deb` double-click is then handled by **DevOS App Installer** (GTK3 UI, `pkexec`
+password prompt, `apt-get install -y ./file.deb` under the hood). Headless check:
+`devos-deb-installer --info file.deb`.
 
 ## Existing installations
 

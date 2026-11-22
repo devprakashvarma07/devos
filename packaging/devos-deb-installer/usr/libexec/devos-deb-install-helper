@@ -1,0 +1,24 @@
+#!/bin/bash
+# DevOS App Installer — root helper (pkexec / sudo -A ke through chalta hai)
+# Local .deb install karta hai; dependencies apt khud resolve karta hai.
+set -u
+
+deb="${1:-}"
+if [ -z "$deb" ] || [ ! -f "$deb" ]; then
+    echo "ERROR: package file nahi mila: ${deb:-<none>}"
+    exit 2
+fi
+
+export DEBIAN_FRONTEND=noninteractive
+export APT_LISTCHANGES_FRONTEND=none
+export LC_ALL=C.UTF-8
+
+echo "==> $(basename "$deb")"
+echo "==> apt-get install -y \"$deb\""
+/usr/bin/apt-get install -y \
+    -o Dpkg::Options::=--force-confdef \
+    -o Dpkg::Options::=--force-confold \
+    "$deb"
+rc=$?
+echo "==> apt-get exit code: $rc"
+exit $rc
