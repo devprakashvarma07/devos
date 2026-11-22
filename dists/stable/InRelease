@@ -6,28 +6,28 @@ Label: DevOS
 Suite: stable
 Codename: stable
 Version: 1.0
-Date: Sun, 22 Nov 2026 02:45:33 +0000
-Valid-Until: Tue, 22 Dec 2026 02:45:33 +0000
+Date: Sun, 22 Nov 2026 02:50:11 +0000
+Valid-Until: Tue, 22 Dec 2026 02:50:11 +0000
 Architectures: amd64
 Components: main
 Description: DevOS package archive
 Acquire-By-Hash: yes
 MD5Sum:
- f7fddded5ebb6e91af7322cf07234474 3308 main/binary-amd64/Packages
- 679c4ad02651d28eac429a799e49c3ea 1655 main/binary-amd64/Packages.gz
- 81d97aa0b89ebd01ab751e222b960eb5 1700 main/binary-amd64/Packages.xz
+ e150ad9e50734789e09d216648d3dca6 3305 main/binary-amd64/Packages
+ 1a6683ab652c0d36c59198648a5d9544 1653 main/binary-amd64/Packages.gz
+ 026313491f406ad3546a9b679b94624d 1696 main/binary-amd64/Packages.xz
 SHA1:
- 7c2bcd43e41d82fe12ca1a103aef4d591b0cce05 3308 main/binary-amd64/Packages
- f16c840e6b916948bd8c939952a2cd6c04688b79 1655 main/binary-amd64/Packages.gz
- 495281fb8cd66de8bd69bb62c8f97ba96c9cd3d6 1700 main/binary-amd64/Packages.xz
+ 3bf5548a8c185b50ebd020cb6531abcc0388608b 3305 main/binary-amd64/Packages
+ adccaac392b4f3c908563e534606f7790836a6ad 1653 main/binary-amd64/Packages.gz
+ b6f15eb247a2ad92985ba90479f50e9c8a52bcbc 1696 main/binary-amd64/Packages.xz
 SHA256:
- 18c3006399403e131d453185af768194e12c00e584db9df3f2647e928b72cdc2 3308 main/binary-amd64/Packages
- 3017d7515d26979ccadea8646e352dfb6146ff8c1301a42e32497eaff1b60c15 1655 main/binary-amd64/Packages.gz
- 75999fdbf1ffc5423eaa8405f6edd608c80645b1c4f473127b22e638afc796d0 1700 main/binary-amd64/Packages.xz
+ b9e0f3d7b43a9602354fc89dfffb77cc1f76c943db556b36979030c58fe58700 3305 main/binary-amd64/Packages
+ e259751bd4a274e393ad7f69e3d3f06a3e0116685721f86831cf2c09330d1cbb 1653 main/binary-amd64/Packages.gz
+ cc45e2d4a163efc3d6d6af9bd47d4bad1d4543527cbd040700954f911dba90ff 1696 main/binary-amd64/Packages.xz
 -----BEGIN PGP SIGNATURE-----
 
-iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCawJXTQAKCRCrAe3eAP7C
-S6TWAP4hIgTd+VRjLUXz4p062q385cQ6yCdJg5xmTNd2tVTUHwEAxqx/dXAk92se
-h6DdBq4zJOqw2s1Vb85ePd1XuIOtVgo=
-=jbs5
+iHUEARYKAB0WIQQ8zoz1YzmCAi3w9RirAe3eAP7CSwUCawJYYwAKCRCrAe3eAP7C
+S6knAP0ZCOAD4y9dOb6YDdwV5f4mvb6cVYFv1ZL1fwIgzZLI2wEA1rQlDa879bWa
+MGocY9TrZaFxBd6MEWXXa44700B8VQE=
+=e/Ym
 -----END PGP SIGNATURE-----
