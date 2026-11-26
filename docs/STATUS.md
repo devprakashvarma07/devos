@@ -1,6 +1,17 @@
 # DevOS 1.0 — status
 
-**Date:** 2026-11-22 · **Base:** Debian 13 `trixie` · **Desktop:** DevOS (Qt/Wayland)
+**Date:** 2026-11-26 · **Base:** Debian 13 `trixie` · **Desktop:** DevOS (Qt/Wayland)
+**Versioning:** CalVer `YY.MM.DD` (`26.11.22`); hotfix `26.11.22.1`, revision `26.11.22-r2`.
+
+## Versioning (CalVer, 2026-11-26)
+
+| Item | Value |
+|---|---|
+| Source of truth | `configs/version.env` (`DEVOS_VERSION=26.11.22`, `DEVOS_BUILD=20261122.1`) |
+| About | `devos-settings` Settings → About reads `/etc/os-release` → `PRETTY_NAME="DevOS 26.11.22 (Build 20261122.1)"`; `BUILD_ID=20261122.1`, `VERSION_ID=26.11.22` |
+| Stamping | `scripts/desktop/stamp-version.sh <rootfs>` → `os-release`, `lsb-release`, `issue`, `issue.net`; called from `base/scripts/build-rootfs.sh` |
+| ISO | `make-iso.sh` sources `version.env` for `-V "DevOS ${DEVOS_VERSION}"` (filename `devos-1.0-amd64-rN.iso` ab bhi stable hai) |
+| Scope | r14 ISO already shipped — version wiring source/docs/rootfs me hai; naya ISO build user ki approval tak nahi |
 
 ## ISO
 

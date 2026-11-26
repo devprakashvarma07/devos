@@ -1,7 +1,12 @@
 NAME="DevOS"
-VERSION="2.0 (Whale)"
+VERSION="26.11.22"
+VERSION_ID="26.11.22"
+PRETTY_NAME="DevOS 26.11.22 (Build 20261122.1)"
+BUILD_ID="20261122.1"
 ID=devos
 ID_LIKE=debian
-PRETTY_NAME="DevOS 2.0 (Whale)"
-VERSION_ID="2.0"
-HOME_URL="https://devos.local"
+VERSION_CODENAME=devos
+ANSI_COLOR="1;34"
+HOME_URL="https://github.com/devprakashvarma07/devos"
+SUPPORT_URL="https://github.com/devprakashvarma07/devos/issues"
+BUG_REPORT_URL="https://github.com/devprakashvarma07/devos/issues"

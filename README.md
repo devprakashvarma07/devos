@@ -9,8 +9,10 @@
 
 | Item | Value |
 |---|---|
-| Version | DevOS 1.0 (live + installer) |
-| ISO size | 1.4 GiB (`devos-1.0-amd64-r11.iso`) |
+| Version | DevOS `26.11.22` (CalVer = YY.MM.DD; hotfix `26.11.22.1`, revision `-r2`) |
+| Build | `20261122.1` — Settings → About dikhata hai `DevOS 26.11.22 (Build 20261122.1)` |
+| Version source | [`configs/version.env`](configs/version.env) → `stamp-version.sh` → `/etc/os-release`, `/etc/lsb-release`, `/etc/issue`, ISO volume label |
+| ISO size | 1.55 GiB (`devos-1.0-amd64-r14.iso`) |
 | Browser | NetSurf 3.11 (lightweight); no heavy browser bundled |
 | Boot | BIOS + UEFI hybrid (isolinux + GRUB), live user `devos` (autologin) |
 | Compositor | `devos-compositor` — the DevOS Wayland compositor |

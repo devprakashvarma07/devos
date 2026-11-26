@@ -52,6 +52,11 @@ Uses `xorriso` in hybrid mode (BIOS + UEFI). Output goes to `/mnt/devos/out/devo
 The MBR template comes from a base hybrid ISO; point `SRC_ISO` at any hybrid ISO with the same
 geometry when rebuilding from scratch.
 
+Version CalVer hai (`YY.MM.DD`): `configs/version.env` ek hi source of truth hai. Squashfs banane se
+pehle `scripts/desktop/stamp-version.sh /mnt/devos/rootfs` chalao — ye `os-release` (About),
+`lsb-release`, `issue` likhta hai; `make-iso.sh` usi version se ISO volume label `-V "DevOS <ver>"`
+lagata hai. Hotfix `26.11.22.1`, revision `26.11.22-r2`.
+
 ## 5. Test
 
 ```bash
@@ -68,7 +73,7 @@ from the target disk.
 - isolinux splash: DevOS artwork, "DevOS 1.0"
 - plymouth: `devos-logo` theme (DevOS wordmark)
 - live desktop: DevOS wallpaper, dock, top bar
-- Settings → About: DevOS logo + "DevOS" title + "Running on DevOS 1.0"
+- Settings → About: DevOS logo + "DevOS" title + "Running on DevOS 26.11.22 (Build 20261122.1)" — value `/etc/os-release` ke `PRETTY_NAME` se aata hai (`scripts/desktop/stamp-version.sh`)
 - Settings → Open-Source Licenses: DevOS section
 - terminal: `fastfetch` → `DE: DevOS`, `WM: DevOS Compositor (Wayland)`
 - installer: "Install DevOS"

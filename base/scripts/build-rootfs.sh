@@ -52,13 +52,15 @@ chroot "$ROOTFS" apt-get install -y --no-install-recommends --allow-downgrades "
 echo "==> identity + locale"
 install -m644 "$PROJ/config/hostname" "$ROOTFS/etc/hostname"
 install -m644 "$PROJ/config/hosts"    "$ROOTFS/etc/hosts"
-install -m644 "$PROJ/config/os-release" "$ROOTFS/etc/os-release"
+# CalVer: eka source (configs/version.env) se os-release + lsb-release + issue stamp.
+# devos-settings ka About page /etc/os-release ka PRETTY_NAME hi dikhati hai.
+bash "$PROJ/../scripts/desktop/stamp-version.sh" "$ROOTFS"
 ln -snf /usr/share/zoneinfo/Etc/UTC "$ROOTFS/etc/localtime"
 echo Etc/UTC > "$ROOTFS/etc/timezone"
 sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' "$ROOTFS/etc/locale.gen"
 chroot "$ROOTFS" locale-gen >/dev/null
 install -m644 "$PROJ/config/locale.conf" "$ROOTFS/etc/default/locale"
-printf 'DevOS 2.0 (Whale)  \\n  \\l\n' > "$ROOTFS/etc/issue"
+# issue ab stamp-version.sh likhta hai (CalVer, 2.0 Whale nahi)
 : > "$ROOTFS/etc/motd"
 
 # ---------- 4. compositor + installer ----------

@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 # Build the bootable DevOS ISO from the prepared tree.
+# Pehle rootfs par `scripts/desktop/stamp-version.sh /mnt/devos/rootfs` chalao,
+# warna squashfs me purana os-release (About version) chala jayega.
 set -euo pipefail
 
 M=/mnt/devos
 ISO_DIR="$M/iso"
 OUT_DIR="$M/out"
+# CalVer: ISO volume label bhi source-of-truth se aata hai.
+PROJ="$(cd "$(dirname "$0")/../.." && pwd)"
+# shellcheck source=configs/version.env
+. "$PROJ/configs/version.env"
 SRC_ISO="${SRC_ISO:-/path/to/base-hybrid.iso}"   # MBR template (kisi bhi hybrid ISO se)
 OUT="$OUT_DIR/devos-1.0-amd64.iso"
 
@@ -20,7 +26,7 @@ wc -l < sha256sum.txt
 echo "[2/2] xorriso"
 xorriso -as mkisofs \
   -iso-level 3 -rock -joliet -joliet-long -full-iso9660-filenames \
-  -V "DevOS 1.0" \
+  -V "DevOS ${DEVOS_VERSION}" \
   -isohybrid-mbr --interval:local_fs:0s-15s:zero_mbrpt,zero_gpt,zero_apm:"$SRC_ISO" \
   -partition_cyl_align on \
   -partition_offset 16 \
